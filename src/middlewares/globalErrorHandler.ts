@@ -1,5 +1,6 @@
 import { ErrorRequestHandler } from "express";
 import status from "http-status";
+import { ZodError } from "zod";
 import env from "../config/env";
 import AppError from "../utils/AppError";
 import sendResponse from "../utils/sendResponse";
@@ -18,6 +19,20 @@ const globalErrorHandler: ErrorRequestHandler = (
       success: false,
       message: error.message,
       errorDetails: error.errorDetails,
+      errorStack: development ? error.stack : undefined,
+    });
+  }
+
+  if (error instanceof ZodError) {
+    const errorDetails = error.issues.map((issue) => ({
+      field: issue.path.join("."),
+      message: issue.message,
+    }));
+    return sendResponse(res, {
+      statusCode: status.BAD_REQUEST,
+      success: false,
+      message: "Validation Error",
+      errorDetails,
       errorStack: development ? error.stack : undefined,
     });
   }
