@@ -1,0 +1,27 @@
+model RentalRequest {
+  id                  String              @id @default(uuid()) @db.Uuid
+  tenantId            String              @map("tenant_id") @db.Uuid
+  propertyId          String              @map("property_id") @db.Uuid
+  status              RentalRequestStatus @default(PENDING)
+  message             String?
+  requestedMoveInDate DateTime            @map("requested_move_in_date") @db.Date
+
+  durationInMonths Int @map("duration_in_months")
+
+  leaseStartDate DateTime? @map("lease_start_date") @db.Date
+  leaseEndDate   DateTime? @map("lease_end_date") @db.Date
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant   User     @relation(fields: [tenantId], references: [id])
+  property Property @relation(fields: [propertyId], references: [id])
+
+  payment Payment?
+  review  Review?
+
+  @@unique([tenantId, propertyId])
+  @@index([propertyId])
+  @@index([status])
+  @@map("rental_requests")
+}
