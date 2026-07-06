@@ -13,10 +13,15 @@ export interface SuccessResponse<T> {
   data?: T;
 }
 
+export interface ErrorDetails {
+  field?: string;
+  message: string;
+}
+
 export interface ErrorResponse {
   statusCode: number;
   success: false;
   message: string;
-  errorDetails: string;
+  errorDetails: ErrorDetails[] | null;
   errorStack?: string;
 }

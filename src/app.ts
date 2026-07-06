@@ -1,5 +1,6 @@
 import express from "express";
 import status from "http-status";
+import globalErrorHandler from "./middlewares/globalErrorHandler";
 import router from "./routes";
 
 const app = express();
@@ -14,5 +15,7 @@ app.get("/", (_req, res) => {
 });
 
 app.use("/api", router);
+
+app.use(globalErrorHandler);
 
 export default app;
