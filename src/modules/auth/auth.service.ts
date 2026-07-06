@@ -1,9 +1,11 @@
 import bcrypt from "bcrypt";
+import status from "http-status";
 import env from "../../config/env";
 import { prisma } from "../../lib/prisma";
-import { IRegistrationPayload } from "./auth.interface";
+import AppError from "../../utils/AppError";
+import { RegisterPayload } from "./auth.validation";
 
-const register = async (payload: IRegistrationPayload) => {
+const register = async (payload: RegisterPayload) => {
   const { name, email, password, role } = payload;
 
   const existingUser = await prisma.user.findUnique({
@@ -13,7 +15,11 @@ const register = async (payload: IRegistrationPayload) => {
   });
 
   if (existingUser) {
-    throw new Error("User already exists with this email");
+    throw new AppError(
+      status.CONFLICT,
+      "User already exists with this email",
+      null,
+    );
   }
 
   const hashedPassword = await bcrypt.hash(password, env.saltRounds);
