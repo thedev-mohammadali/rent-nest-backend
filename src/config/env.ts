@@ -5,6 +5,7 @@ configDotenv({ quiet: true, path: path.join(process.cwd(), ".env") });
 
 const port = Number(process.env.PORT) || 3000;
 const dbString = process.env.DATABASE_URL;
+const saltRounds = Number(process.env.BCRYPT_SALT_ROUNDS) || 10;
 
 if (!dbString) {
   throw new Error("Database connection string not found");
@@ -13,4 +14,5 @@ if (!dbString) {
 export default {
   port,
   dbString,
+  saltRounds,
 };
