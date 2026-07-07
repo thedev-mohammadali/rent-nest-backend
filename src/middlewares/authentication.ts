@@ -4,10 +4,11 @@ import jwt from "jsonwebtoken";
 import env from "../config/env";
 import { prisma } from "../lib/prisma";
 import AppError from "../utils/AppError";
+import catchAsync from "../utils/catchAsync";
 import { JwtTokenPayload } from "../utils/jwt";
 
-const authenticate = () => {
-  return async (req: Request, _res: Response, next: NextFunction) => {
+const authenticate = catchAsync(
+  async (req: Request, _res: Response, next: NextFunction) => {
     const authorizationHeader = req.headers.authorization;
     const token = authorizationHeader
       ? authorizationHeader.startsWith("Bearer")
@@ -56,10 +57,8 @@ const authenticate = () => {
 
     req.user = authenticatedUser;
 
-    console.log(authenticatedUser);
-
     next();
-  };
-};
+  },
+);
 
 export default authenticate;
