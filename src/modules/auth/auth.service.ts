@@ -1,9 +1,9 @@
 import bcrypt from "bcrypt";
 import status from "http-status";
-import jwt from "jsonwebtoken";
 import env from "../../config/env";
 import { prisma } from "../../lib/prisma";
 import AppError from "../../utils/AppError";
+import { generateAccessToken, generateRefreshToken } from "../../utils/jwt";
 import { LoginPayload, RegisterPayload } from "./auth.validation";
 
 const register = async (payload: RegisterPayload) => {
@@ -45,9 +45,13 @@ const login = async (payload: LoginPayload) => {
 
   const user = await prisma.user.findUnique({
     where: { email },
-    omit: {
-      createdAt: true,
-      updatedAt: true,
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      password: true,
+      role: true,
+      isActive: true,
     },
   });
 
@@ -75,15 +79,12 @@ const login = async (payload: LoginPayload) => {
 
   const tokenPayload = {
     userId: user.id,
+    role: user.role,
   };
 
-  const accessToken = jwt.sign(tokenPayload, env.jwtAccessSecret, {
-    expiresIn: env.jwtAccessExpiresIn,
-  });
+  const accessToken = generateAccessToken(tokenPayload);
 
-  const refreshToken = jwt.sign(tokenPayload, env.jwtRefreshSecret, {
-    expiresIn: env.jwtRefreshExpiresIn,
-  });
+  const refreshToken = generateRefreshToken(tokenPayload);
 
   const { password: _, ...userWithoutPassword } = user;
 

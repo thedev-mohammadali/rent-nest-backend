@@ -21,21 +21,21 @@ const login = catchAsync(async (req, res) => {
   res.cookie("accessToken", accessToken, {
     httpOnly: true,
     sameSite: "lax",
-    secure: !(env.nodeEnv === "development"),
+    secure: env.nodeEnv !== "development",
     maxAge: env.jwtAccessExpiresMs,
   });
 
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
     sameSite: "lax",
-    secure: !(env.nodeEnv === "development"),
+    secure: env.nodeEnv !== "development",
     maxAge: env.jwtRefreshExpiresMs,
   });
 
   sendResponse(res, {
     statusCode: status.OK,
     success: true,
-    message: "Log in successfull",
+    message: "Logged in successfully",
     data: { user, accessToken },
   });
 });

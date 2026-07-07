@@ -39,7 +39,10 @@ export const loginSchema = z.object({
         : "Please provide a valid email",
   }),
 
-  password: z.string("Password is required"),
+  password: z
+    .string("Password is required")
+    .trim()
+    .min(1, "Password is required"),
 });
 
 export const authValidation = {
