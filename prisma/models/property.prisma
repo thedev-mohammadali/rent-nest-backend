@@ -9,7 +9,7 @@ model Property {
   amenities   String[]
   bedrooms    Int?
   bathrooms   Int?
-  size        Decimal  @db.Decimal(10, 2)
+  size        Decimal? @db.Decimal(10, 2)
   images      String[]
   categoryId  String   @map("category_id") @db.Uuid
 

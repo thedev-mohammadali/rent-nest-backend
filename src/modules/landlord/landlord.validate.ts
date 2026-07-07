@@ -34,7 +34,7 @@ export const createPropertyListingSchema = z.object({
     .positive("Bathrooms must be greater than 0")
     .optional(),
 
-  size: z.number("Size is required").positive("Size must be greater than 0"),
+  size: z.number().positive("Size must be greater than 0").optional(),
 
   images: z.array(z.url("Image must be a valid URL")).optional(),
 
