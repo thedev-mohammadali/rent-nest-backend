@@ -19,6 +19,25 @@ const createPropertyListing = catchAsync(async (req, res) => {
   });
 });
 
+const editPropertyListing = catchAsync(async (req, res) => {
+  const landlordId = req.user.id;
+  const propertyId = req.params.id as string;
+
+  const updatedListing = await landlordService.editPropertyListing(
+    propertyId,
+    landlordId,
+    req.body,
+  );
+
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: "Property updated successfully",
+    data: updatedListing,
+  });
+});
+
 export const landlordController = {
   createPropertyListing,
+  editPropertyListing,
 };

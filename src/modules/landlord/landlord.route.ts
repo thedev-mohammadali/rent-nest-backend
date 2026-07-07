@@ -4,7 +4,10 @@ import authenticate from "../../middlewares/authentication";
 import authorize from "../../middlewares/authorization";
 import validateRequest from "../../middlewares/validateRequest";
 import { landlordController } from "./landlord.controller";
-import { createPropertyListingSchema } from "./landlord.validate";
+import {
+  createPropertyListingSchema,
+  updatePropertyListingSchema,
+} from "./landlord.validate";
 
 const router = Router();
 
@@ -14,6 +17,14 @@ router.post(
   authorize(UserRole.LANDLORD),
   validateRequest(createPropertyListingSchema),
   landlordController.createPropertyListing,
+);
+
+router.patch(
+  "/properties/:id",
+  authenticate,
+  authorize(UserRole.LANDLORD),
+  validateRequest(updatePropertyListingSchema),
+  landlordController.editPropertyListing,
 );
 
 export const landlordRoutes = router;

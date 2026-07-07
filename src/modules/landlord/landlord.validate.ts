@@ -44,6 +44,58 @@ export const createPropertyListingSchema = z.object({
   }),
 });
 
+export const updatePropertyListingSchema = z
+  .object({
+    title: z
+      .string()
+      .trim()
+      .min(5, "Title must be at least 5 characters")
+      .max(200, "Title cannot exceed 200 characters")
+      .optional(),
+
+    description: z
+      .string()
+      .trim()
+      .min(20, "Description must be at least 20 characters")
+      .optional(),
+
+    rent: z.number().positive("Rent must be greater than 0").optional(),
+
+    location: z
+      .string()
+      .trim()
+      .min(2, "Location must be at least 2 characters")
+      .max(100, "Location cannot exceed 100 characters")
+      .optional(),
+
+    amenities: z.array(z.string().trim()).optional(),
+
+    bedrooms: z
+      .number()
+      .int("Bedrooms must be a whole number")
+      .positive("Bedrooms must be greater than 0")
+      .optional(),
+
+    bathrooms: z
+      .number()
+      .int("Bathrooms must be a whole number")
+      .positive("Bathrooms must be greater than 0")
+      .optional(),
+
+    size: z.number().positive("Size must be greater than 0").optional(),
+
+    images: z.array(z.url("Image must be a valid URL")).optional(),
+
+    categoryId: z.uuid("Invalid category id").optional(),
+  })
+  .refine((data) => Object.keys(data).length > 0, {
+    message: "At least one field is required",
+  });
+
 export type CreatePropertyListingPayload = z.infer<
   typeof createPropertyListingSchema
+>;
+
+export type UpdatePropertyListingPayload = z.infer<
+  typeof updatePropertyListingSchema
 >;

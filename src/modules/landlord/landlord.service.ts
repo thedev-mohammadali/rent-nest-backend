@@ -1,28 +1,18 @@
 import status from "http-status";
 import { prisma } from "../../lib/prisma";
 import AppError from "../../utils/AppError";
-import { CreatePropertyListingPayload } from "./landlord.validate";
+import {
+  CreatePropertyListingPayload,
+  UpdatePropertyListingPayload,
+} from "./landlord.validate";
 
 const createPropertyListing = async (
   landlordId: string,
   payload: CreatePropertyListingPayload,
 ) => {
-  const {
-    title,
-    rent,
-    categoryId,
-    description,
-    location,
-    amenities,
-    bathrooms,
-    bedrooms,
-    images,
-    size,
-  } = payload;
-
   const category = await prisma.category.findUnique({
     where: {
-      id: categoryId,
+      id: payload.categoryId,
     },
   });
 
@@ -33,20 +23,49 @@ const createPropertyListing = async (
   return prisma.property.create({
     data: {
       landlordId,
-      title,
-      categoryId,
-      description,
-      location,
-      rent,
-      size,
-      amenities,
-      bedrooms,
-      bathrooms,
-      images,
+      ...payload,
     },
+  });
+};
+
+const editPropertyListing = async (
+  propertyId: string,
+  landlordId: string,
+  payload: UpdatePropertyListingPayload,
+) => {
+  const existingProperty = await prisma.property.findFirst({
+    where: {
+      id: propertyId,
+      landlordId,
+    },
+  });
+
+  if (!existingProperty) {
+    throw new AppError(status.NOT_FOUND, "Property not found", null);
+  }
+
+  if (payload.categoryId) {
+    const category = await prisma.category.findUnique({
+      where: {
+        id: payload.categoryId,
+      },
+    });
+
+    if (!category) {
+      throw new AppError(status.BAD_REQUEST, "Category not found", null);
+    }
+  }
+
+  return prisma.property.update({
+    where: {
+      id: propertyId,
+      landlordId,
+    },
+    data: payload,
   });
 };
 
 export const landlordService = {
   createPropertyListing,
+  editPropertyListing,
 };
