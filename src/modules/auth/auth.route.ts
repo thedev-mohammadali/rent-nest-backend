@@ -16,4 +16,6 @@ router.post("/login", validateRequest(loginSchema), authController.login);
 
 router.get("/me", authenticate, authController.getMe);
 
+router.post("/logout", authenticate, authController.logout);
+
 export const authRoutes = router;
