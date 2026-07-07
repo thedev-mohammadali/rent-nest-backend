@@ -31,8 +31,21 @@ export const registerSchema = z.object({
   }),
 });
 
+export const loginSchema = z.object({
+  email: z.email({
+    error: (issue) =>
+      issue.input == null
+        ? "Email is required"
+        : "Please provide a valid email",
+  }),
+
+  password: z.string("Password is required"),
+});
+
 export const authValidation = {
   registerSchema,
+  loginSchema,
 };
 
 export type RegisterPayload = z.infer<typeof registerSchema>;
+export type LoginPayload = z.infer<typeof loginSchema>;

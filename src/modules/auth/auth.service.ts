@@ -1,9 +1,10 @@
 import bcrypt from "bcrypt";
 import status from "http-status";
+import jwt from "jsonwebtoken";
 import env from "../../config/env";
 import { prisma } from "../../lib/prisma";
 import AppError from "../../utils/AppError";
-import { RegisterPayload } from "./auth.validation";
+import { LoginPayload, RegisterPayload } from "./auth.validation";
 
 const register = async (payload: RegisterPayload) => {
   const { name, email, password, role } = payload;
@@ -39,6 +40,61 @@ const register = async (payload: RegisterPayload) => {
   });
 };
 
+const login = async (payload: LoginPayload) => {
+  const { email, password } = payload;
+
+  const user = await prisma.user.findUnique({
+    where: { email },
+    omit: {
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+
+  if (!user) {
+    throw new AppError(status.UNAUTHORIZED, "Invalid credentials", [
+      { message: "Email or Password didn't match" },
+    ]);
+  }
+
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+
+  if (!isPasswordValid) {
+    throw new AppError(status.UNAUTHORIZED, "Invalid credentials", [
+      { message: "Email or Password didn't match" },
+    ]);
+  }
+
+  if (!user.isActive) {
+    throw new AppError(
+      status.FORBIDDEN,
+      "Account is not active. Please contact support.",
+      null,
+    );
+  }
+
+  const tokenPayload = {
+    userId: user.id,
+  };
+
+  const accessToken = jwt.sign(tokenPayload, env.jwtAccessSecret, {
+    expiresIn: env.jwtAccessExpiresIn,
+  });
+
+  const refreshToken = jwt.sign(tokenPayload, env.jwtRefreshSecret, {
+    expiresIn: env.jwtRefreshExpiresIn,
+  });
+
+  const { password: _, ...userWithoutPassword } = user;
+
+  return {
+    user: userWithoutPassword,
+    accessToken,
+    refreshToken,
+  };
+};
+
 export const authService = {
   register,
+  login,
 };
