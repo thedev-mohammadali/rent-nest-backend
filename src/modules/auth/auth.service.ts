@@ -3,7 +3,11 @@ import status from "http-status";
 import env from "../../config/env";
 import { prisma } from "../../lib/prisma";
 import AppError from "../../utils/AppError";
-import { generateAccessToken, generateRefreshToken } from "../../utils/jwt";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  verifyRefreshToken,
+} from "../../utils/jwt";
 import { LoginPayload, RegisterPayload } from "./auth.validation";
 
 const register = async (payload: RegisterPayload) => {
@@ -95,7 +99,48 @@ const login = async (payload: LoginPayload) => {
   };
 };
 
+const refreshAccessToken = async (payload: string) => {
+  const verifiedRefreshToken = verifyRefreshToken(payload);
+
+  const user = await prisma.user.findUnique({
+    where: {
+      id: verifiedRefreshToken.userId,
+    },
+    select: {
+      id: true,
+      isActive: true,
+      role: true,
+    },
+  });
+
+  if (!user) {
+    throw new AppError(
+      status.UNAUTHORIZED,
+      "Authentication required. Please login to continue",
+      null,
+    );
+  }
+
+  if (!user.isActive) {
+    throw new AppError(
+      status.UNAUTHORIZED,
+      "Account is inactive. Please contact support",
+      null,
+    );
+  }
+
+  const tokenPayload = {
+    userId: user.id,
+    role: user.role,
+  };
+
+  const accessToken = generateAccessToken(tokenPayload);
+
+  return accessToken;
+};
+
 export const authService = {
   register,
   login,
+  refreshAccessToken,
 };

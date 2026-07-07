@@ -1,4 +1,5 @@
 import status from "http-status";
+import AppError from "../../utils/AppError";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 import { authService } from "./auth.service";
@@ -51,9 +52,33 @@ const logout = catchAsync(async (_req, res) => {
   });
 });
 
+const refreshAccessToken = catchAsync(async (req, res) => {
+  const refreshToken = req.cookies.refreshToken;
+
+  if (!refreshToken) {
+    throw new AppError(
+      status.UNAUTHORIZED,
+      "Please log in again to continue",
+      null,
+    );
+  }
+
+  const accessToken = await authService.refreshAccessToken(refreshToken);
+
+  res.cookie("accessToken", accessToken, accessCookieOptions);
+
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: "Token refreshed successfully",
+    data: { accessToken },
+  });
+});
+
 export const authController = {
   register,
   login,
   getMe,
   logout,
+  refreshAccessToken,
 };
