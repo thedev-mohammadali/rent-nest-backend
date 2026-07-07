@@ -1,5 +1,6 @@
 import { configDotenv } from "dotenv";
 import { SignOptions } from "jsonwebtoken";
+import ms from "ms";
 import path from "node:path";
 
 configDotenv({ quiet: true, path: path.join(process.cwd(), ".env") });
@@ -16,6 +17,15 @@ const jwtAccessExpiresIn =
   (process.env.JWT_ACCESS_EXPIRES_IN as SignOptions["expiresIn"]) || "1d";
 const jwtRefreshExpiresIn =
   (process.env.JWT_REFRESH_EXPIRES_IN as SignOptions["expiresIn"]) || "7d";
+
+const jwtAccessExpiresMs =
+  typeof jwtAccessExpiresIn === "number"
+    ? jwtAccessExpiresIn * 1000
+    : ms(jwtAccessExpiresIn);
+const jwtRefreshExpiresMs =
+  typeof jwtRefreshExpiresIn === "number"
+    ? jwtRefreshExpiresIn * 1000
+    : ms(jwtRefreshExpiresIn);
 
 if (!dbString) {
   throw new Error("Database connection string not found");
@@ -38,4 +48,6 @@ export default {
   jwtRefreshSecret,
   jwtAccessExpiresIn,
   jwtRefreshExpiresIn,
+  jwtAccessExpiresMs,
+  jwtRefreshExpiresMs,
 };
