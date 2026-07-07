@@ -1,11 +1,10 @@
-import { NextFunction, Request, Response } from "express";
 import status from "http-status";
 import { UserRole } from "../generated/prisma/enums";
 import AppError from "../utils/AppError";
 import catchAsync from "../utils/catchAsync";
 
 const authorize = (...requiredRoles: [UserRole, ...UserRole[]]) =>
-  catchAsync((req: Request, _res: Response, next: NextFunction) => {
+  catchAsync((req, _res, next) => {
     const authenticatedUser = req.user;
 
     if (!authenticatedUser) {

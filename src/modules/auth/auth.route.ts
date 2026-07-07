@@ -1,4 +1,5 @@
 import { Router } from "express";
+import authenticate from "../../middlewares/authentication";
 import validateRequest from "../../middlewares/validateRequest";
 import { authController } from "./auth.controller";
 import { loginSchema, registerSchema } from "./auth.validation";
@@ -12,5 +13,7 @@ router.post(
 );
 
 router.post("/login", validateRequest(loginSchema), authController.login);
+
+router.get("/me", authenticate, authController.getMe);
 
 export const authRoutes = router;

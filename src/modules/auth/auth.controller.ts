@@ -40,7 +40,17 @@ const login = catchAsync(async (req, res) => {
   });
 });
 
+const getMe = catchAsync(async (req, res) => {
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: "User data retrieved successfully",
+    data: req.user,
+  });
+});
+
 export const authController = {
   register,
   login,
+  getMe,
 };
