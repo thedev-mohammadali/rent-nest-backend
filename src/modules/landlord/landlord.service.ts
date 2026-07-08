@@ -239,10 +239,42 @@ const getMyPropertyById = async (propertyId: string, landlordId: string) => {
   return property;
 };
 
+const updateMyPropertyAvailabilityStatus = async (
+  propertyId: string,
+  landlordId: string,
+) => {
+  const property = await prisma.property.findFirst({
+    where: {
+      id: propertyId,
+      landlordId,
+    },
+  });
+
+  if (!property) {
+    throw new AppError(status.NOT_FOUND, "Property not found", null);
+  }
+
+  const updateAvailabilityStatus = !property.isAvailable;
+
+  return prisma.property.update({
+    where: {
+      id: propertyId,
+      landlordId,
+    },
+    data: {
+      isAvailable: updateAvailabilityStatus,
+    },
+    select: {
+      isAvailable: true,
+    },
+  });
+};
+
 export const landlordService = {
   createPropertyListing,
   editPropertyListing,
   getMyProperties,
   deletePropertyListing,
   getMyPropertyById,
+  updateMyPropertyAvailabilityStatus,
 };

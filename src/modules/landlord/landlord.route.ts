@@ -48,4 +48,11 @@ router.get(
   landlordController.getMyPropertyById,
 );
 
+router.patch(
+  "/properties/update-status/:id",
+  authenticate,
+  authorize(UserRole.LANDLORD),
+  landlordController.updateMyPropertyAvailabilityStatus,
+);
+
 export const landlordRoutes = router;
