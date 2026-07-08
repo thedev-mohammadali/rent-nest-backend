@@ -6,6 +6,14 @@ import {
   UpdatePropertyListingPayload,
 } from "./landlord.validate";
 
+const getMyProperties = async (landlordId: string) => {
+  return prisma.property.findMany({
+    where: {
+      landlordId,
+    },
+  });
+};
+
 const createPropertyListing = async (
   landlordId: string,
   payload: CreatePropertyListingPayload,
@@ -68,4 +76,5 @@ const editPropertyListing = async (
 export const landlordService = {
   createPropertyListing,
   editPropertyListing,
+  getMyProperties,
 };

@@ -11,6 +11,13 @@ import {
 
 const router = Router();
 
+router.get(
+  "/properties",
+  authenticate,
+  authorize(UserRole.LANDLORD),
+  landlordController.getMyProperties,
+);
+
 router.post(
   "/properties",
   authenticate,

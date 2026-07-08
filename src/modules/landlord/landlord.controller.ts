@@ -3,6 +3,19 @@ import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 import { landlordService } from "./landlord.service";
 
+const getMyProperties = catchAsync(async (req, res) => {
+  const landlordId = req.user.id;
+
+  const listings = await landlordService.getMyProperties(landlordId);
+
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: "Property listings retrieved successfully",
+    data: listings,
+  });
+});
+
 const createPropertyListing = catchAsync(async (req, res) => {
   const landlordId = req.user.id;
 
@@ -40,4 +53,5 @@ const editPropertyListing = catchAsync(async (req, res) => {
 export const landlordController = {
   createPropertyListing,
   editPropertyListing,
+  getMyProperties,
 };
