@@ -34,4 +34,18 @@ router.patch(
   landlordController.editPropertyListing,
 );
 
+router.delete(
+  "/properties/:id",
+  authenticate,
+  authorize(UserRole.LANDLORD),
+  landlordController.deletePropertyListing,
+);
+
+router.get(
+  "/properties/:id",
+  authenticate,
+  authorize(UserRole.LANDLORD),
+  landlordController.getMyPropertyById,
+);
+
 export const landlordRoutes = router;

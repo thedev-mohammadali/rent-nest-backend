@@ -15,8 +15,8 @@ const getMyProperties = async (
   landlordId: string,
   query: GetPropertyListingsQuery,
 ) => {
-  const limit = Math.max(1, Number(query.page) || 1);
-  const page = Math.max(1, Number(query.limit) || 10);
+  const limit = Math.max(1, Number(query.limit) || 10);
+  const page = Math.max(1, Number(query.page) || 1);
   const skip = (page - 1) * limit;
 
   const sortBy =
@@ -201,8 +201,48 @@ const editPropertyListing = async (
   });
 };
 
+const deletePropertyListing = async (
+  propertyId: string,
+  landlordId: string,
+) => {
+  const existingProperty = await prisma.property.findFirst({
+    where: {
+      id: propertyId,
+      landlordId,
+    },
+  });
+
+  if (!existingProperty) {
+    throw new AppError(status.NOT_FOUND, "Property not found", null);
+  }
+
+  await prisma.property.delete({
+    where: {
+      id: propertyId,
+      landlordId,
+    },
+  });
+};
+
+const getMyPropertyById = async (propertyId: string, landlordId: string) => {
+  const property = await prisma.property.findFirst({
+    where: {
+      id: propertyId,
+      landlordId,
+    },
+  });
+
+  if (!property) {
+    throw new AppError(status.NOT_FOUND, "Property not found", null);
+  }
+
+  return property;
+};
+
 export const landlordService = {
   createPropertyListing,
   editPropertyListing,
   getMyProperties,
+  deletePropertyListing,
+  getMyPropertyById,
 };

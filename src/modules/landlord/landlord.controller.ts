@@ -54,8 +54,40 @@ const editPropertyListing = catchAsync(async (req, res) => {
   });
 });
 
+const deletePropertyListing = catchAsync(async (req, res) => {
+  const landlordId = req.user.id;
+  const propertyId = req.params.id as string;
+
+  await landlordService.deletePropertyListing(propertyId, landlordId);
+
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: "Property deleted successfully",
+  });
+});
+
+const getMyPropertyById = catchAsync(async (req, res) => {
+  const landlordId = req.user.id;
+  const propertyId = req.params.id as string;
+
+  const property = await landlordService.getMyPropertyById(
+    propertyId,
+    landlordId,
+  );
+
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: "Property retrieved successfully",
+    data: property,
+  });
+});
+
 export const landlordController = {
   createPropertyListing,
   editPropertyListing,
   getMyProperties,
+  deletePropertyListing,
+  getMyPropertyById,
 };
