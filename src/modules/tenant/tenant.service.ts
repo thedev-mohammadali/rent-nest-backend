@@ -47,6 +47,9 @@ const submitRentalRequest = async (
       requestedMoveInDate,
       durationInMonths,
     },
+    include: {
+      property: true,
+    },
   });
 };
 

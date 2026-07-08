@@ -1,14 +1,24 @@
 import status from "http-status";
-import { PropertyWhereInput } from "../../generated/prisma/models";
+import {
+  RentalRequestStatus,
+  RentalStatus,
+} from "../../generated/prisma/enums";
+import {
+  PropertyWhereInput,
+  RentalRequestWhereInput,
+} from "../../generated/prisma/models";
 import { prisma } from "../../lib/prisma";
 import AppError from "../../utils/AppError";
-import { GetPropertyListingsQuery } from "./landlord.interface";
+import { isValidEnumValue } from "../../utils/validateEnum";
+import {
+  GetPropertyListingsQuery,
+  GetRentalRequestsQuery,
+} from "./landlord.interface";
 import {
   CreatePropertyListingPayload,
   UpdatePropertyListingPayload,
 } from "./landlord.validate";
 
-const SORTABLE_FIELDS = ["createdAt", "rent", "title", "updatedAt"] as const;
 const SORT_ORDERS = ["asc", "desc"] as const;
 
 const getMyProperties = async (
@@ -18,6 +28,8 @@ const getMyProperties = async (
   const limit = Math.max(1, Number(query.limit) || 10);
   const page = Math.max(1, Number(query.page) || 1);
   const skip = (page - 1) * limit;
+
+  const SORTABLE_FIELDS = ["createdAt", "rent", "title", "updatedAt"] as const;
 
   const sortBy =
     query.sortBy && SORTABLE_FIELDS.includes(query.sortBy)
@@ -270,6 +282,113 @@ const updateMyPropertyAvailabilityStatus = async (
   });
 };
 
+const getRentalRequests = async (
+  landlordId: string,
+  query: GetRentalRequestsQuery,
+) => {
+  const limit = Math.max(1, Number(query.limit) || 10);
+  const page = Math.max(1, Number(query.page) || 1);
+  const skip = (page - 1) * limit;
+
+  const SORTABLE_FIELDS = [
+    "createdAt",
+    "leaseStartDate",
+    "leaseEndDate",
+    "requestedMoveInDate",
+    "durationInMonths",
+  ] as const;
+
+  const sortBy =
+    query.sortBy && SORTABLE_FIELDS.includes(query.sortBy)
+      ? query.sortBy
+      : "createdAt";
+
+  const sortOrder =
+    query.sortOrder && SORT_ORDERS.includes(query.sortOrder)
+      ? query.sortOrder
+      : "desc";
+
+  const { rentalStatus, status: rentalRequestStatus } = query;
+
+  const andCondition: RentalRequestWhereInput[] = [];
+
+  if (rentalStatus) {
+    if (!isValidEnumValue(RentalStatus, rentalStatus)) {
+      throw new AppError(
+        status.BAD_REQUEST,
+        "Invalid rental request status",
+        null,
+      );
+    }
+    andCondition.push({
+      rentalStatus,
+    });
+  }
+
+  if (rentalRequestStatus) {
+    if (!isValidEnumValue(RentalRequestStatus, rentalRequestStatus)) {
+      throw new AppError(
+        status.BAD_REQUEST,
+        "Invalid rental request status",
+        null,
+      );
+    }
+    andCondition.push({
+      status: rentalRequestStatus,
+    });
+  }
+
+  const requests = await prisma.rentalRequest.findMany({
+    where: {
+      property: {
+        landlordId,
+      },
+      AND: andCondition,
+    },
+    include: {
+      tenant: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      property: {
+        select: {
+          id: true,
+          title: true,
+          location: true,
+          rent: true,
+        },
+      },
+    },
+    orderBy: {
+      [sortBy]: sortOrder,
+    },
+    take: limit,
+    skip,
+  });
+
+  const totalRequests = await prisma.rentalRequest.count({
+    where: {
+      property: {
+        landlordId,
+      },
+      AND: andCondition,
+    },
+  });
+
+  return {
+    meta: {
+      page,
+      limit,
+      total: totalRequests,
+      totalPages: Math.ceil(totalRequests / limit),
+    },
+    requests,
+  };
+};
+
 export const landlordService = {
   createPropertyListing,
   editPropertyListing,
@@ -277,4 +396,5 @@ export const landlordService = {
   deletePropertyListing,
   getMyPropertyById,
   updateMyPropertyAvailabilityStatus,
+  getRentalRequests,
 };

@@ -55,4 +55,18 @@ router.patch(
   landlordController.updateMyPropertyAvailabilityStatus,
 );
 
+router.get(
+  "/rental-requests",
+  authenticate,
+  authorize(UserRole.LANDLORD),
+  landlordController.getRentalRequests,
+);
+
+router.patch(
+  "/rental-requests/:id",
+  authenticate,
+  authorize(UserRole.LANDLORD),
+  landlordController.editPropertyListing,
+);
+
 export const landlordRoutes = router;
