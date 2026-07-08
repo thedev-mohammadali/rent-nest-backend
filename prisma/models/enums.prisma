@@ -8,8 +8,14 @@ enum RentalRequestStatus {
   PENDING
   APPROVED
   REJECTED
+  CANCELLED
+}
+
+enum RentalStatus {
+  NOT_STARTED
   ACTIVE
   COMPLETED
+  TERMINATED
 }
 
 enum PaymentStatus {
