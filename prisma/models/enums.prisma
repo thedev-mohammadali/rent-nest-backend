@@ -27,8 +27,12 @@ enum PaymentStatus {
   CANCELLED
 }
 
-enum PaymentType {
-  FULL_LEASE_PAYMENT
+enum RentalAgreementStatus {
+  PENDING_PAYMENT
+  ACTIVE
+  COMPLETED
+  TERMINATED
+  CANCELLED
 }
 
 enum PaymentProvider {

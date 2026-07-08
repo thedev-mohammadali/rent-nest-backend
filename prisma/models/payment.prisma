@@ -1,29 +1,25 @@
 model Payment {
-  id String @id @default(uuid()) @db.Uuid
+  id                String          @id @default(uuid()) @db.Uuid
+  rentalAgreementId String          @map("rental_agreement_id") @db.Uuid
+  amount            Decimal         @db.Decimal(10, 2)
+  currency          String          @default("usd") @db.VarChar(20)
+  status            PaymentStatus   @default(PENDING)
+  provider          PaymentProvider @default(STRIPE)
 
-  rentalRequestId String @map("rental_request_id") @db.Uuid
-
-  amount Decimal @db.Decimal(10, 2)
-
-  currency String @default("bdt")
-
-  type PaymentType @default(FULL_LEASE_PAYMENT)
-
-  status PaymentStatus @default(PENDING)
-
-  provider PaymentProvider @default(STRIPE)
-
-  stripeSessionId String? @unique @map("stripe_session_id")
-
+  stripeSessionId       String? @unique @map("stripe_session_id")
   stripePaymentIntentId String? @unique @map("stripe_payment_intent_id")
-
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  checkoutUrl           String? @map("checkout_url")
+  failureReason         String? @map("failure_reason")
+  metadata              Json?
 
   paidAt DateTime? @map("paid_at") @db.Timestamptz(3)
 
-  rentalRequest RentalRequest @relation(fields: [rentalRequestId], references: [id])
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
+  rentalAgreement RentalAgreement @relation(fields: [rentalAgreementId], references: [id])
+
+  @@index([rentalAgreementId])
   @@index([status])
-  @@index([rentalRequestId])
   @@map("payments")
 }
