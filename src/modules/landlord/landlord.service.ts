@@ -17,6 +17,7 @@ import {
 import {
   CreatePropertyListingPayload,
   UpdatePropertyListingPayload,
+  UpdateRentalRequestStatus,
 } from "./landlord.validate";
 
 const SORT_ORDERS = ["asc", "desc"] as const;
@@ -389,6 +390,102 @@ const getRentalRequests = async (
   };
 };
 
+const updateRentalRequestStatus = async (
+  landlordId: string,
+  requestId: string,
+  payload: UpdateRentalRequestStatus,
+) => {
+  const rentalRequest = await prisma.rentalRequest.findFirst({
+    where: {
+      id: requestId,
+      property: {
+        landlordId,
+      },
+    },
+  });
+
+  if (!rentalRequest) {
+    throw new AppError(status.NOT_FOUND, "Rental request not found", null);
+  }
+
+  if (rentalRequest.status !== RentalRequestStatus.PENDING) {
+    throw new AppError(
+      status.BAD_REQUEST,
+      "Only pending rental requests can be updated",
+      null,
+    );
+  }
+
+  if (payload.status === RentalRequestStatus.REJECTED) {
+    const updatedRequest = await prisma.rentalRequest.update({
+      where: {
+        id: requestId,
+      },
+      data: {
+        status: RentalRequestStatus.REJECTED,
+      },
+      select: {
+        status: true,
+      },
+    });
+
+    return updatedRequest.status;
+  }
+
+  const updatedStatus = await prisma.$transaction(async (tx) => {
+    const leaseStartDate = rentalRequest.requestedMoveInDate;
+
+    const leaseEndDate = new Date(leaseStartDate);
+
+    leaseEndDate.setMonth(
+      leaseEndDate.getMonth() + rentalRequest.durationInMonths,
+    );
+
+    const updatedRequest = await tx.rentalRequest.update({
+      where: {
+        id: requestId,
+      },
+      data: {
+        status: RentalRequestStatus.APPROVED,
+        leaseStartDate,
+        leaseEndDate,
+      },
+      select: {
+        status: true,
+        propertyId: true,
+      },
+    });
+
+    await tx.rentalRequest.updateMany({
+      where: {
+        propertyId: updatedRequest.propertyId,
+
+        status: RentalRequestStatus.PENDING,
+
+        id: {
+          not: requestId,
+        },
+      },
+      data: {
+        status: RentalRequestStatus.REJECTED,
+      },
+    });
+
+    await tx.property.update({
+      where: {
+        id: updatedRequest.propertyId,
+      },
+      data: {
+        isAvailable: false,
+      },
+    });
+
+    return updatedRequest.status;
+  });
+
+  return updatedStatus;
+};
+
 export const landlordService = {
   createPropertyListing,
   editPropertyListing,
@@ -397,4 +494,5 @@ export const landlordService = {
   getMyPropertyById,
   updateMyPropertyAvailabilityStatus,
   getRentalRequests,
+  updateRentalRequestStatus,
 };

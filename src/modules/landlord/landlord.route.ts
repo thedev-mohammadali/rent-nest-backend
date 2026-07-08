@@ -66,7 +66,7 @@ router.patch(
   "/rental-requests/:id",
   authenticate,
   authorize(UserRole.LANDLORD),
-  landlordController.editPropertyListing,
+  landlordController.updateRentalRequestStatus,
 );
 
 export const landlordRoutes = router;

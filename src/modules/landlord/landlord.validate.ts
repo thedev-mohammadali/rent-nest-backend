@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { RentalRequestStatus } from "../../generated/prisma/enums";
 
 export const createPropertyListingSchema = z.object({
   title: z
@@ -91,6 +92,19 @@ export const updatePropertyListingSchema = z
   .refine((data) => Object.keys(data).length > 0, {
     message: "At least one field is required",
   });
+
+export const updateRentalRequestStatusSchema = z.object({
+  status: z.enum([RentalRequestStatus.APPROVED, RentalRequestStatus.REJECTED], {
+    error: (issue) =>
+      issue.input == null
+        ? "Status is required"
+        : "Invalid status! Status can either be APPROVED or REJECTED",
+  }),
+});
+
+export type UpdateRentalRequestStatus = z.infer<
+  typeof updateRentalRequestStatusSchema
+>;
 
 export type CreatePropertyListingPayload = z.infer<
   typeof createPropertyListingSchema

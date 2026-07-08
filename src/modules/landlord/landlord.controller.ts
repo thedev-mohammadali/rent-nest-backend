@@ -118,6 +118,22 @@ const getRentalRequests = catchAsync(async (req, res) => {
   });
 });
 
+const updateRentalRequestStatus = catchAsync(async (req, res) => {
+  const landlordId = req.user.id;
+
+  const updatedStatus = await landlordService.updateRentalRequestStatus(
+    landlordId,
+    req.params.id as string,
+    req.body,
+  );
+
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: `Rental requests status updated to ${updatedStatus} successfully`,
+  });
+});
+
 export const landlordController = {
   createPropertyListing,
   editPropertyListing,
@@ -126,4 +142,5 @@ export const landlordController = {
   getMyPropertyById,
   updateMyPropertyAvailabilityStatus,
   getRentalRequests,
+  updateRentalRequestStatus,
 };
