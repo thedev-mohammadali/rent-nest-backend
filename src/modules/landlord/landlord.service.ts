@@ -1,4 +1,5 @@
 import status from "http-status";
+import { PropertyWhereInput } from "../../generated/prisma/models";
 import { prisma } from "../../lib/prisma";
 import AppError from "../../utils/AppError";
 import { GetPropertyListingsQuery } from "./landlord.interface";
@@ -7,19 +8,114 @@ import {
   UpdatePropertyListingPayload,
 } from "./landlord.validate";
 
+const SORTABLE_FIELDS = ["createdAt", "rent", "title", "updatedAt"] as const;
+const SORT_ORDERS = ["asc", "desc"] as const;
+
 const getMyProperties = async (
   landlordId: string,
   query: GetPropertyListingsQuery,
 ) => {
-  const limit = Number(query.limit) || 10;
-  const page = Number(query.page) || 1;
+  const limit = Math.max(1, Number(query.page) || 1);
+  const page = Math.max(1, Number(query.limit) || 10);
   const skip = (page - 1) * limit;
-  const sortBy = query.sortBy || "createdAt";
-  const sortOrder = query.sortOrder || "desc";
+
+  const sortBy =
+    query.sortBy && SORTABLE_FIELDS.includes(query.sortBy)
+      ? query.sortBy
+      : "createdAt";
+
+  const sortOrder =
+    query.sortOrder && SORT_ORDERS.includes(query.sortOrder)
+      ? query.sortOrder
+      : "desc";
+
+  const { categoryId, isAvailable, location, search, minRent, maxRent } = query;
+
+  const andCondition: PropertyWhereInput[] = [];
+
+  if (categoryId) {
+    andCondition.push({
+      categoryId,
+    });
+  }
+
+  if (typeof isAvailable !== "undefined") {
+    andCondition.push({ isAvailable: isAvailable === "true" ? true : false });
+  }
+
+  if (location) {
+    andCondition.push({
+      location: {
+        contains: location,
+        mode: "insensitive",
+      },
+    });
+  }
+
+  if (minRent) {
+    andCondition.push({
+      rent: {
+        gte: Number(minRent),
+      },
+    });
+  }
+
+  if (maxRent) {
+    andCondition.push({
+      rent: {
+        lte: Number(maxRent),
+      },
+    });
+  }
+
+  if (search) {
+    andCondition.push({
+      OR: [
+        {
+          location: {
+            contains: search,
+            mode: "insensitive",
+          },
+        },
+        {
+          title: {
+            contains: search,
+            mode: "insensitive",
+          },
+        },
+        {
+          description: {
+            contains: search,
+            mode: "insensitive",
+          },
+        },
+        {
+          category: {
+            name: {
+              contains: search,
+              mode: "insensitive",
+            },
+          },
+        },
+      ],
+    });
+  }
 
   const listings = await prisma.property.findMany({
     where: {
-      AND: [{ landlordId }],
+      landlordId,
+      AND: andCondition,
+    },
+    include: {
+      category: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+    },
+    omit: {
+      categoryId: true,
     },
     orderBy: {
       [sortBy]: sortOrder,
@@ -31,6 +127,7 @@ const getMyProperties = async (
   const propertyCount = await prisma.property.count({
     where: {
       landlordId,
+      AND: andCondition,
     },
   });
 

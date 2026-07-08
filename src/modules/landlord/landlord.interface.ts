@@ -1,12 +1,12 @@
 export type GetPropertyListingsQuery = {
-  page?: number;
-  limit?: number;
+  page?: string;
+  limit?: string;
   sortBy?: "title" | "rent" | "createdAt" | "updatedAt";
   sortOrder?: "asc" | "desc";
-  isAvailable?: boolean;
+  isAvailable?: string;
   location?: string;
   categoryId?: string;
-  minRent?: number;
-  maxRent?: number;
+  minRent?: string;
+  maxRent?: string;
   search?: string;
 };
