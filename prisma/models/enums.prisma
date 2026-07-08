@@ -20,9 +20,15 @@ enum RentalStatus {
 
 enum PaymentStatus {
   PENDING
-  SUCCESS
-  CANCELLED
+  PROCESSING
+  PAID
   FAILED
+  REFUNDED
+  CANCELLED
+}
+
+enum PaymentType {
+  FULL_LEASE_PAYMENT
 }
 
 enum PaymentProvider {

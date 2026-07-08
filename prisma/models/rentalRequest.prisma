@@ -9,6 +9,8 @@ model RentalRequest {
 
   durationInMonths Int @map("duration_in_months")
 
+  monthlyRent Decimal @map("monthly_rent") @db.Decimal(10, 2)
+
   leaseStartDate DateTime? @map("lease_start_date") @db.Date
   leaseEndDate   DateTime? @map("lease_end_date") @db.Date
 
@@ -18,8 +20,8 @@ model RentalRequest {
   tenant   User     @relation(fields: [tenantId], references: [id])
   property Property @relation(fields: [propertyId], references: [id])
 
-  payment Payment?
-  review  Review?
+  payments Payment[]
+  review   Review?
 
   @@index([propertyId])
   @@index([status])

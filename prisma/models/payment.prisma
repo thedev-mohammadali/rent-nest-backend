@@ -1,16 +1,29 @@
 model Payment {
-  id              String          @id @default(uuid()) @db.Uuid
-  rentalRequestId String          @unique @map("rental_request_id") @db.Uuid
-  amount          Decimal         @db.Decimal(10, 2)
-  transactionId   String          @unique @map("transaction_id") @db.VarChar(255)
-  status          PaymentStatus   @default(PENDING)
-  provider        PaymentProvider @default(STRIPE)
+  id String @id @default(uuid()) @db.Uuid
 
-  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  paidAt    DateTime? @map("paid_at") @db.Timestamptz(3)
+  rentalRequestId String @map("rental_request_id") @db.Uuid
+
+  amount Decimal @db.Decimal(10, 2)
+
+  currency String @default("bdt")
+
+  type PaymentType @default(FULL_LEASE_PAYMENT)
+
+  status PaymentStatus @default(PENDING)
+
+  provider PaymentProvider @default(STRIPE)
+
+  stripeSessionId String? @unique @map("stripe_session_id")
+
+  stripePaymentIntentId String? @unique @map("stripe_payment_intent_id")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  paidAt DateTime? @map("paid_at") @db.Timestamptz(3)
 
   rentalRequest RentalRequest @relation(fields: [rentalRequestId], references: [id])
 
   @@index([status])
+  @@index([rentalRequestId])
   @@map("payments")
 }
