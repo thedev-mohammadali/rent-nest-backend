@@ -406,7 +406,6 @@ const updateRentalRequestStatus = async (
       property: {
         select: {
           id: true,
-          rent: true,
         },
       },
     },
@@ -441,23 +440,12 @@ const updateRentalRequestStatus = async (
   }
 
   const updatedStatus = await prisma.$transaction(async (tx) => {
-    const leaseStartDate = rentalRequest.requestedMoveInDate;
-
-    const leaseEndDate = new Date(leaseStartDate);
-
-    leaseEndDate.setMonth(
-      leaseEndDate.getMonth() + rentalRequest.durationInMonths,
-    );
-
     const updatedRequest = await tx.rentalRequest.update({
       where: {
         id: requestId,
       },
       data: {
         status: RentalRequestStatus.APPROVED,
-        monthlyRent: rentalRequest.property.rent,
-        leaseStartDate,
-        leaseEndDate,
       },
       select: {
         status: true,
@@ -468,9 +456,7 @@ const updateRentalRequestStatus = async (
     await tx.rentalRequest.updateMany({
       where: {
         propertyId: updatedRequest.propertyId,
-
         status: RentalRequestStatus.PENDING,
-
         id: {
           not: requestId,
         },
