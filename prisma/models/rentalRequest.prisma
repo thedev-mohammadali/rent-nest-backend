@@ -9,7 +9,7 @@ model RentalRequest {
 
   durationInMonths Int @map("duration_in_months")
 
-  monthlyRent Decimal @map("monthly_rent") @db.Decimal(10, 2)
+  monthlyRent Decimal? @map("monthly_rent") @db.Decimal(10, 2)
 
   leaseStartDate DateTime? @map("lease_start_date") @db.Date
   leaseEndDate   DateTime? @map("lease_end_date") @db.Date

@@ -402,6 +402,14 @@ const updateRentalRequestStatus = async (
         landlordId,
       },
     },
+    include: {
+      property: {
+        select: {
+          id: true,
+          rent: true,
+        },
+      },
+    },
   });
 
   if (!rentalRequest) {
@@ -447,6 +455,7 @@ const updateRentalRequestStatus = async (
       },
       data: {
         status: RentalRequestStatus.APPROVED,
+        monthlyRent: rentalRequest.property.rent,
         leaseStartDate,
         leaseEndDate,
       },
