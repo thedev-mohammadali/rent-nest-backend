@@ -17,7 +17,10 @@ const jwtAccessExpiresIn =
   (process.env.JWT_ACCESS_EXPIRES_IN as SignOptions["expiresIn"]) || "1d";
 const jwtRefreshExpiresIn =
   (process.env.JWT_REFRESH_EXPIRES_IN as SignOptions["expiresIn"]) || "7d";
+
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+const successUrl = process.env.STRIPE_SUCCESS_URL!;
+const cancelUrl = process.env.STRIPE_CANCEL_URL!;
 
 const jwtAccessExpiresMs =
   typeof jwtAccessExpiresIn === "number"
@@ -40,9 +43,9 @@ if (!jwtRefreshSecret) {
   throw new Error("JWT refresh secret is missing");
 }
 
-// if (!stripeSecretKey) {
-//   throw new Error("Stripe secret key is missing");
-// }
+if (!stripeSecretKey) {
+  throw new Error("Stripe secret key is missing");
+}
 
 export default {
   port,
@@ -56,4 +59,6 @@ export default {
   jwtAccessExpiresMs,
   jwtRefreshExpiresMs,
   stripeSecretKey,
+  successUrl,
+  cancelUrl,
 };
