@@ -6,12 +6,16 @@ import { landlordService } from "./landlord.service";
 const getMyProperties = catchAsync(async (req, res) => {
   const landlordId = req.user.id;
 
-  const listings = await landlordService.getMyProperties(landlordId);
+  const { meta, listings } = await landlordService.getMyProperties(
+    landlordId,
+    req.query,
+  );
 
   sendResponse(res, {
     statusCode: status.OK,
     success: true,
     message: "Property listings retrieved successfully",
+    meta,
     data: listings,
   });
 });

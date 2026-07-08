@@ -1,17 +1,48 @@
 import status from "http-status";
 import { prisma } from "../../lib/prisma";
 import AppError from "../../utils/AppError";
+import { GetPropertyListingsQuery } from "./landlord.interface";
 import {
   CreatePropertyListingPayload,
   UpdatePropertyListingPayload,
 } from "./landlord.validate";
 
-const getMyProperties = async (landlordId: string) => {
-  return prisma.property.findMany({
+const getMyProperties = async (
+  landlordId: string,
+  query: GetPropertyListingsQuery,
+) => {
+  const limit = Number(query.limit) || 10;
+  const page = Number(query.page) || 1;
+  const skip = (page - 1) * limit;
+  const sortBy = query.sortBy || "createdAt";
+  const sortOrder = query.sortOrder || "desc";
+
+  const listings = await prisma.property.findMany({
+    where: {
+      AND: [{ landlordId }],
+    },
+    orderBy: {
+      [sortBy]: sortOrder,
+    },
+    take: limit,
+    skip,
+  });
+
+  const propertyCount = await prisma.property.count({
     where: {
       landlordId,
     },
   });
+
+  return {
+    meta: {
+      page,
+      limit,
+      total: propertyCount,
+      totalPages: Math.ceil(propertyCount / limit),
+    },
+    listings,
+  };
 };
 
 const createPropertyListing = async (
