@@ -1,7 +1,4 @@
-import {
-  RentalRequestStatus,
-  RentalStatus,
-} from "../../generated/prisma/enums";
+import { RentalRequestStatus } from "../../generated/prisma/enums";
 
 export type GetPropertyListingsQuery = {
   page?: string;
@@ -19,13 +16,7 @@ export type GetPropertyListingsQuery = {
 export type GetRentalRequestsQuery = {
   page?: string;
   limit?: string;
-  sortBy?:
-    | "leaseStartDate"
-    | "leaseEndDate"
-    | "createdAt"
-    | "durationInMonths"
-    | "requestedMoveInDate";
+  sortBy?: "createdAt" | "durationInMonths" | "requestedMoveInDate";
   sortOrder?: "asc" | "desc";
   status?: RentalRequestStatus;
-  rentalStatus?: RentalStatus;
 };

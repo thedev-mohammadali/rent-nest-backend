@@ -40,9 +40,9 @@ if (!jwtRefreshSecret) {
   throw new Error("JWT refresh secret is missing");
 }
 
-if (!stripeSecretKey) {
-  throw new Error("Stripe secret key is missing");
-}
+// if (!stripeSecretKey) {
+//   throw new Error("Stripe secret key is missing");
+// }
 
 export default {
   port,

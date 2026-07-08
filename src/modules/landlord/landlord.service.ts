@@ -1,8 +1,5 @@
 import status from "http-status";
-import {
-  RentalRequestStatus,
-  RentalStatus,
-} from "../../generated/prisma/enums";
+import { RentalRequestStatus } from "../../generated/prisma/enums";
 import {
   PropertyWhereInput,
   RentalRequestWhereInput,
@@ -293,8 +290,6 @@ const getRentalRequests = async (
 
   const SORTABLE_FIELDS = [
     "createdAt",
-    "leaseStartDate",
-    "leaseEndDate",
     "requestedMoveInDate",
     "durationInMonths",
   ] as const;
@@ -309,12 +304,10 @@ const getRentalRequests = async (
       ? query.sortOrder
       : "desc";
 
-  const { rentalStatus, status: rentalRequestStatus } = query;
-
   const andCondition: RentalRequestWhereInput[] = [];
 
-  if (rentalStatus) {
-    if (!isValidEnumValue(RentalStatus, rentalStatus)) {
+  if (query.status) {
+    if (!isValidEnumValue(RentalRequestStatus, query.status)) {
       throw new AppError(
         status.BAD_REQUEST,
         "Invalid rental request status",
@@ -322,20 +315,7 @@ const getRentalRequests = async (
       );
     }
     andCondition.push({
-      rentalStatus,
-    });
-  }
-
-  if (rentalRequestStatus) {
-    if (!isValidEnumValue(RentalRequestStatus, rentalRequestStatus)) {
-      throw new AppError(
-        status.BAD_REQUEST,
-        "Invalid rental request status",
-        null,
-      );
-    }
-    andCondition.push({
-      status: rentalRequestStatus,
+      status: query.status,
     });
   }
 
@@ -440,22 +420,47 @@ const updateRentalRequestStatus = async (
   }
 
   const updatedStatus = await prisma.$transaction(async (tx) => {
-    const updatedRequest = await tx.rentalRequest.update({
+    const {
+      id: rentalRequestId,
+      tenantId,
+      propertyId,
+      durationInMonths,
+      requestedMoveInDate,
+      status,
+      property,
+    } = await tx.rentalRequest.update({
       where: {
         id: requestId,
       },
       data: {
         status: RentalRequestStatus.APPROVED,
       },
-      select: {
-        status: true,
-        propertyId: true,
+      include: {
+        property: true,
+      },
+    });
+
+    const leaseStartDate = new Date(requestedMoveInDate);
+    const leaseEndDate = new Date(leaseStartDate);
+
+    leaseEndDate.setMonth(leaseEndDate.getMonth() + durationInMonths);
+    leaseEndDate.setDate(leaseEndDate.getDate() - 1);
+
+    await tx.rentalAgreement.create({
+      data: {
+        rentalRequestId,
+        tenantId,
+        propertyId,
+        monthlyRent: property.rent,
+        durationInMonths,
+        leaseStartDate,
+        leaseEndDate,
       },
     });
 
     await tx.rentalRequest.updateMany({
       where: {
-        propertyId: updatedRequest.propertyId,
+        propertyId,
         status: RentalRequestStatus.PENDING,
         id: {
           not: requestId,
@@ -468,14 +473,14 @@ const updateRentalRequestStatus = async (
 
     await tx.property.update({
       where: {
-        id: updatedRequest.propertyId,
+        id: propertyId,
       },
       data: {
         isAvailable: false,
       },
     });
 
-    return updatedRequest.status;
+    return status;
   });
 
   return updatedStatus;

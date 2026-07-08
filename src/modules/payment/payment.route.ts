@@ -2,6 +2,6 @@ import { Router } from "express";
 
 const router = Router();
 
-router.post("/:rentalRequestId/create-checkout", () => {});
+router.post("/rental-agreements/:agreement-id/checkout", () => {});
 
 export const paymentRoutes = router;
