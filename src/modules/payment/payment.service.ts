@@ -4,6 +4,7 @@ import {
   RentalAgreementStatus,
 } from "../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
+import { stripeService } from "../../lib/stripe/stripe.service";
 import AppError from "../../utils/AppError";
 
 const createCheckoutSession = async (
@@ -36,29 +37,55 @@ const createCheckoutSession = async (
     );
   }
 
-  const existingPayment = await prisma.payment.findFirst({
-    where: {
-      rentalAgreementId,
-      status: {
-        in: [PaymentStatus.PENDING, PaymentStatus.PROCESSING],
+  const payment = await prisma.$transaction(async (tx) => {
+    const existingPayment = await tx.payment.findFirst({
+      where: {
+        rentalAgreementId,
+        status: {
+          in: [PaymentStatus.PENDING, PaymentStatus.PROCESSING],
+        },
       },
-    },
+    });
+
+    if (existingPayment) {
+      throw new AppError(
+        status.CONFLICT,
+        "A payment is already pending for this agreement",
+        null,
+      );
+    }
+    return tx.payment.create({
+      data: {
+        rentalAgreementId,
+        amount: rentalAgreement.monthlyRent,
+        currency: "bdt",
+      },
+    });
   });
 
-  if (existingPayment) {
-    throw new AppError(
-      status.CONFLICT,
-      "A payment is already pending for this agreement",
-      null,
-    );
-  }
+  const checkoutSession = await stripeService.createCheckoutSession({
+    paymentId: payment.id,
+    rentalAgreementId,
+    rentalRequestId: rentalAgreement.rentalRequestId,
+    tenantId,
+    currency: payment.currency,
+    amount: Number(payment.amount),
+    propertyTitle: rentalAgreement.property.title,
+  });
 
-  const payment = await prisma.payment.create({
+  await prisma.payment.update({
+    where: {
+      id: payment.id,
+    },
     data: {
-      rentalAgreementId,
-      amount: rentalAgreement.monthlyRent,
+      stripeSessionId: checkoutSession.id,
+      checkoutUrl: checkoutSession.url,
     },
   });
+
+  return {
+    checkoutUrl: checkoutSession.url,
+  };
 };
 
 export const paymentService = {

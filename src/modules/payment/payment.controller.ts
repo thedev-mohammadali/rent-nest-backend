@@ -4,16 +4,16 @@ import sendResponse from "../../utils/sendResponse";
 import { paymentService } from "./payment.service";
 
 const createCheckoutSession = catchAsync(async (req, res) => {
-  const data = await paymentService.createCheckoutSession(
+  const checkoutSession = await paymentService.createCheckoutSession(
     req.user.id,
     req.params.agreementId as string,
   );
 
   sendResponse(res, {
-    statusCode: status.CREATED,
+    statusCode: status.OK,
     success: true,
     message: "Checkout session created successfully",
-    data: data,
+    data: checkoutSession,
   });
 });
 
