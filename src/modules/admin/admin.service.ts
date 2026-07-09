@@ -5,6 +5,7 @@ import { prisma } from "../../lib/prisma";
 import AppError from "../../utils/AppError";
 import { isValidEnumValue } from "../../utils/validateEnum";
 import { GetUsersQuery } from "./admin.interface";
+import { UpdateUserStatus } from "./admin.validate";
 
 const getAllUsers = async (query: GetUsersQuery) => {
   const limit = Math.max(1, Number(query.limit) || 10);
@@ -73,6 +74,35 @@ const getAllUsers = async (query: GetUsersQuery) => {
   };
 };
 
+const updateUserStatus = async (userId: string, payload: UpdateUserStatus) => {
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+  });
+
+  if (!user) {
+    throw new AppError(status.NOT_FOUND, "No users found", null);
+  }
+
+  if (user.isActive === payload.isActive) {
+    throw new AppError(status.CONFLICT, "User is already updated", null);
+  }
+
+  return prisma.user.update({
+    where: {
+      id: userId,
+    },
+    data: {
+      isActive: payload.isActive,
+    },
+    omit: {
+      password: true,
+    },
+  });
+};
+
 export const adminService = {
   getAllUsers,
+  updateUserStatus,
 };
