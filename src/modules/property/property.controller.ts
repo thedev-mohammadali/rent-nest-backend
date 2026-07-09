@@ -17,6 +17,20 @@ const getAvailableProperties = catchAsync(async (req, res) => {
   });
 });
 
+const getPropertyById = catchAsync(async (req, res) => {
+  const property = await propertyService.getPropertyById(
+    req.params.propertyId as string,
+  );
+
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: "Property retreived successfully",
+    data: property,
+  });
+});
+
 export const propertyController = {
   getAvailableProperties,
+  getPropertyById,
 };

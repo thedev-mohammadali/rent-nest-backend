@@ -1,5 +1,7 @@
+import status from "http-status";
 import { PropertyWhereInput } from "../../generated/prisma/models";
 import { prisma } from "../../lib/prisma";
+import AppError from "../../utils/AppError";
 import { GetPropertiesQuery } from "./property.interface";
 
 const getAvailableProperties = async (query: GetPropertiesQuery) => {
@@ -116,6 +118,24 @@ const getAvailableProperties = async (query: GetPropertiesQuery) => {
   };
 };
 
+const getPropertyById = async (propertyId: string) => {
+  const property = await prisma.property.findUnique({
+    where: {
+      id: propertyId,
+    },
+    include: {
+      reviews: true,
+    },
+  });
+
+  if (!property) {
+    throw new AppError(status.NOT_FOUND, "Property not found", null);
+  }
+
+  return property;
+};
+
 export const propertyService = {
   getAvailableProperties,
+  getPropertyById,
 };
