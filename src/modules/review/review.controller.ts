@@ -18,6 +18,23 @@ const createReview = catchAsync(async (req, res) => {
   });
 });
 
+const getReviewsByPropertyId = catchAsync(async (req, res) => {
+  const { meta, reviews } = await reviewService.getReviewsByPropertyId(
+    req.user.id,
+    req.params.propertyId as string,
+    req.query,
+  );
+
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: "Reviews retrieved successfully",
+    meta,
+    data: reviews,
+  });
+});
+
 export const reviewController = {
   createReview,
+  getReviewsByPropertyId,
 };

@@ -16,4 +16,11 @@ router.post(
   reviewController.createReview,
 );
 
+router.get(
+  "/:propertyId",
+  authenticate,
+  authorize(UserRole.LANDLORD),
+  reviewController.getReviewsByPropertyId,
+);
+
 export const reviewRoutes = router;

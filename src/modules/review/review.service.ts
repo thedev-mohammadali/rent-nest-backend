@@ -2,7 +2,10 @@ import status from "http-status";
 import { RentalAgreementStatus } from "../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
 import AppError from "../../utils/AppError";
+import { GetReviewsQuery } from "./review.interface";
 import { CreateReview } from "./review.validate";
+
+const SORT_ORDERS = ["asc", "desc"] as const;
 
 const createReview = async (
   tenantId: string,
@@ -67,6 +70,80 @@ const createReview = async (
   });
 };
 
+const getReviewsByPropertyId = async (
+  landlordId: string,
+  propertyId: string,
+  query: GetReviewsQuery,
+) => {
+  const limit = Math.max(1, Number(query.limit) || 10);
+  const page = Math.max(1, Number(query.page) || 1);
+  const skip = (page - 1) * limit;
+
+  const SORTABLE_FIELDS = ["createdAt"] as const;
+
+  const sortBy =
+    query.sortBy && SORTABLE_FIELDS.includes(query.sortBy)
+      ? query.sortBy
+      : "createdAt";
+
+  const sortOrder =
+    query.sortOrder && SORT_ORDERS.includes(query.sortOrder)
+      ? query.sortOrder
+      : "desc";
+
+  const reviews = await prisma.review.findMany({
+    where: {
+      propertyId,
+      property: {
+        landlordId,
+      },
+    },
+    select: {
+      id: true,
+      rating: true,
+      comment: true,
+      createdAt: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      property: {
+        select: {
+          id: true,
+          title: true,
+        },
+      },
+    },
+    orderBy: {
+      [sortBy]: sortOrder,
+    },
+    take: limit,
+    skip,
+  });
+
+  const totalReviews = await prisma.review.count({
+    where: {
+      propertyId,
+      property: {
+        landlordId,
+      },
+    },
+  });
+
+  return {
+    meta: {
+      page,
+      limit,
+      total: totalReviews,
+      totalPages: Math.ceil(totalReviews / limit),
+    },
+    reviews,
+  };
+};
+
 export const reviewService = {
   createReview,
+  getReviewsByPropertyId,
 };
