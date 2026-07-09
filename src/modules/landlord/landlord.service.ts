@@ -1,7 +1,11 @@
 import status from "http-status";
-import { RentalRequestStatus } from "../../generated/prisma/enums";
+import {
+  RentalAgreementStatus,
+  RentalRequestStatus,
+} from "../../generated/prisma/enums";
 import {
   PropertyWhereInput,
+  RentalAgreementWhereInput,
   RentalRequestWhereInput,
 } from "../../generated/prisma/models";
 import { prisma } from "../../lib/prisma";
@@ -9,6 +13,7 @@ import AppError from "../../utils/AppError";
 import { isValidEnumValue } from "../../utils/validateEnum";
 import {
   GetPropertyListingsQuery,
+  GetRentalAgreementsQuery,
   GetRentalRequestsQuery,
 } from "./landlord.interface";
 import {
@@ -486,12 +491,47 @@ const updateRentalRequestStatus = async (
   return updatedStatus;
 };
 
-const getRentalAgreements = async (landlordId: string) => {
+const getRentalAgreements = async (
+  landlordId: string,
+  query: GetRentalAgreementsQuery,
+) => {
+  const limit = Math.max(1, Number(query.limit) || 10);
+  const page = Math.max(1, Number(query.page) || 1);
+  const skip = (page - 1) * limit;
+
+  const SORTABLE_FIELDS = [
+    "createdAt",
+    "leaseStartDate",
+    "leaseEndDate",
+  ] as const;
+
+  const sortBy =
+    query.sortBy && SORTABLE_FIELDS.includes(query.sortBy)
+      ? query.sortBy
+      : "createdAt";
+
+  const sortOrder =
+    query.sortOrder && SORT_ORDERS.includes(query.sortOrder)
+      ? query.sortOrder
+      : "desc";
+
+  const andCondition: RentalAgreementWhereInput[] = [];
+
+  if (query.status) {
+    if (!isValidEnumValue(RentalAgreementStatus, query.status)) {
+      throw new AppError(status.BAD_REQUEST, "Invalid status query", null);
+    }
+    andCondition.push({
+      status: query.status,
+    });
+  }
+
   const agreements = await prisma.rentalAgreement.findMany({
     where: {
       property: {
         landlordId,
       },
+      AND: andCondition,
     },
     select: {
       id: true,
@@ -514,9 +554,31 @@ const getRentalAgreements = async (landlordId: string) => {
       createdAt: true,
       updatedAt: true,
     },
+    orderBy: {
+      [sortBy]: sortOrder,
+    },
+    take: limit,
+    skip,
   });
 
-  return agreements;
+  const totalAgreements = await prisma.rentalAgreement.count({
+    where: {
+      property: {
+        landlordId,
+      },
+      AND: andCondition,
+    },
+  });
+
+  return {
+    meta: {
+      page,
+      limit,
+      total: totalAgreements,
+      totalPages: Math.ceil(totalAgreements / limit),
+    },
+    agreements,
+  };
 };
 
 export const landlordService = {

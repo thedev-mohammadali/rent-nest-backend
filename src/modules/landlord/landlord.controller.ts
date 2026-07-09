@@ -137,12 +137,16 @@ const updateRentalRequestStatus = catchAsync(async (req, res) => {
 const getRentalAgreements = catchAsync(async (req, res) => {
   const landlordId = req.user.id;
 
-  const agreements = await landlordService.getRentalAgreements(landlordId);
+  const { meta, agreements } = await landlordService.getRentalAgreements(
+    landlordId,
+    req.query,
+  );
 
   sendResponse(res, {
     statusCode: status.OK,
     success: true,
     message: `Rental agreements retreived successfully`,
+    meta,
     data: agreements,
   });
 });
