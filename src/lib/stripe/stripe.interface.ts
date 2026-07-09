@@ -3,6 +3,7 @@ export interface CreateCheckoutSessionPayload {
   rentalAgreementId: string;
   rentalRequestId: string;
   tenantId: string;
+  email: string;
 
   amount: number;
   currency: string;

@@ -67,6 +67,7 @@ const handleStripeWebhook = async (payload: Buffer, signature: string) => {
 
 const createCheckoutSession = async (
   tenantId: string,
+  userEmail: string,
   rentalAgreementId: string,
 ) => {
   const rentalAgreement = await prisma.rentalAgreement.findFirst({
@@ -126,6 +127,7 @@ const createCheckoutSession = async (
     rentalAgreementId,
     rentalRequestId: rentalAgreement.rentalRequestId,
     tenantId,
+    email: userEmail,
     currency: payment.currency,
     amount: Math.round(Number(payment.amount)),
     propertyTitle: rentalAgreement.property.title,

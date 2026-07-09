@@ -23,6 +23,8 @@ const createCheckoutSession = async (payload: CreateCheckoutSessionPayload) => {
     success_url: env.successUrl,
     cancel_url: env.cancelUrl,
 
+    customer_email: payload.email,
+
     metadata: {
       paymentId: payload.paymentId,
       rentalAgreementId: payload.rentalAgreementId,

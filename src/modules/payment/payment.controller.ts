@@ -19,6 +19,7 @@ const handleStripeWebhook = catchAsync(async (req, res) => {
 const createCheckoutSession = catchAsync(async (req, res) => {
   const checkoutSession = await paymentService.createCheckoutSession(
     req.user.id,
+    req.user.email,
     req.params.agreementId as string,
   );
 

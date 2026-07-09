@@ -17,6 +17,22 @@ const submitRentalRequest = catchAsync(async (req, res) => {
   });
 });
 
+const getAllRentalRequests = catchAsync(async (req, res) => {
+  const { meta, requests } = await tenantService.getAllRentalRequests(
+    req.user.id,
+    req.query,
+  );
+
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: "Rental requests retreived successfully",
+    meta,
+    data: requests,
+  });
+});
+
 export const tenantController = {
   submitRentalRequest,
+  getAllRentalRequests,
 };

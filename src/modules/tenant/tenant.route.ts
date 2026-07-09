@@ -9,11 +9,18 @@ import { submitRentalRequestSchema } from "./tenant.validate";
 const router = Router();
 
 router.post(
-  "/rental-request",
+  "/rental-requests",
   authenticate,
   authorize(UserRole.TENANT),
   validateRequest(submitRentalRequestSchema),
   tenantController.submitRentalRequest,
+);
+
+router.get(
+  "/rental-requests/me",
+  authenticate,
+  authorize(UserRole.TENANT),
+  tenantController.getAllRentalRequests,
 );
 
 export const tenantRoutes = router;
