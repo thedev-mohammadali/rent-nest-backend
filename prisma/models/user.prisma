@@ -12,6 +12,7 @@ model User {
   rentalRequests   RentalRequest[]
   rentalAgreements RentalAgreement[]
   properties       Property[]
+  reviews          Review[]
 
   @@index([role])
   @@index([isActive])

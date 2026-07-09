@@ -15,7 +15,6 @@ model RentalRequest {
   property Property @relation(fields: [propertyId], references: [id])
 
   rentalAgreement RentalAgreement?
-  review          Review?
 
   @@index([propertyId])
   @@index([status])

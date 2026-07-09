@@ -22,6 +22,7 @@ model RentalAgreement {
     property      Property      @relation(fields: [propertyId], references: [id])
 
     payments Payment[]
+    reviews  Review[]
 
     @@index([tenantId])
     @@index([propertyId])
