@@ -7,6 +7,8 @@ import { prisma } from "../../lib/prisma";
 import { stripeService } from "../../lib/stripe/stripe.service";
 import AppError from "../../utils/AppError";
 
+const handleStripeWebhook = async (payload: Buffer, signature: string) => {};
+
 const createCheckoutSession = async (
   tenantId: string,
   rentalAgreementId: string,
@@ -90,4 +92,5 @@ const createCheckoutSession = async (
 
 export const paymentService = {
   createCheckoutSession,
+  handleStripeWebhook,
 };

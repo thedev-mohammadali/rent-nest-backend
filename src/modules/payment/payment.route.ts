@@ -6,6 +6,8 @@ import { paymentController } from "./payment.controller";
 
 const router = Router();
 
+router.post("/webhook", paymentController.handleStripeWebhook);
+
 router.post(
   "/rental-agreements/:agreementId/checkout",
   authenticate,
