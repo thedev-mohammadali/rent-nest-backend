@@ -21,6 +21,7 @@ const jwtRefreshExpiresIn =
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 const successUrl = process.env.STRIPE_SUCCESS_URL!;
 const cancelUrl = process.env.STRIPE_CANCEL_URL!;
+const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 const jwtAccessExpiresMs =
   typeof jwtAccessExpiresIn === "number"
@@ -47,6 +48,10 @@ if (!stripeSecretKey) {
   throw new Error("Stripe secret key is missing");
 }
 
+if (!endpointSecret) {
+  throw new Error("Stripe End Point Secret is missing");
+}
+
 export default {
   port,
   dbString,
@@ -61,4 +66,5 @@ export default {
   stripeSecretKey,
   successUrl,
   cancelUrl,
+  endpointSecret,
 };
