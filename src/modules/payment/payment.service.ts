@@ -1,6 +1,7 @@
 import status from "http-status";
 import Stripe from "stripe";
 import env from "../../config/env";
+import { Prisma } from "../../generated/prisma/client";
 import {
   PaymentStatus,
   RentalAgreementStatus,
@@ -27,13 +28,41 @@ const handleStripeWebhook = async (payload: Buffer, signature: string) => {
     );
   }
 
-  switch (event.type) {
-    case "checkout.session.completed":
-      await handleCheckoutCompleted(event.data.object);
-      break;
-    default:
-      console.log(`Unhandled event: ${event.type}`);
+  const existingEvent = await prisma.stripeWebhookEvent.findUnique({
+    where: {
+      stripeEventId: event.id,
+    },
+  });
+
+  if (existingEvent?.processedAt) {
+    return;
   }
+
+  await prisma.$transaction(async (tx) => {
+    const webhookEvent = await prisma.stripeWebhookEvent.create({
+      data: {
+        stripeEventId: event.id,
+        type: event.type,
+      },
+    });
+
+    switch (event.type) {
+      case "checkout.session.completed":
+        await handleCheckoutCompleted(tx, event.data.object);
+        break;
+      default:
+        console.log(`Unhandled event: ${event.type}`);
+    }
+
+    await tx.stripeWebhookEvent.update({
+      where: {
+        id: webhookEvent.id,
+      },
+      data: {
+        processedAt: new Date(),
+      },
+    });
+  });
 };
 
 const createCheckoutSession = async (
@@ -98,7 +127,7 @@ const createCheckoutSession = async (
     rentalRequestId: rentalAgreement.rentalRequestId,
     tenantId,
     currency: payment.currency,
-    amount: Number(payment.amount),
+    amount: Math.round(Number(payment.amount)),
     propertyTitle: rentalAgreement.property.title,
   });
 
@@ -117,7 +146,10 @@ const createCheckoutSession = async (
   };
 };
 
-const handleCheckoutCompleted = async (session: Stripe.Checkout.Session) => {
+const handleCheckoutCompleted = async (
+  tx: Prisma.TransactionClient,
+  session: Stripe.Checkout.Session,
+) => {
   const paymentId = session.metadata?.paymentId;
 
   if (!paymentId) {
@@ -128,41 +160,41 @@ const handleCheckoutCompleted = async (session: Stripe.Checkout.Session) => {
     );
   }
 
-  await prisma.$transaction(async (tx) => {
-    const payment = await tx.payment.findUnique({
-      where: {
-        id: paymentId,
-      },
-    });
+  const payment = await tx.payment.findUnique({
+    where: {
+      id: paymentId,
+    },
+  });
 
-    if (!payment) {
-      throw new AppError(status.NOT_FOUND, "Pyament not found", null);
-    }
+  if (!payment) {
+    throw new AppError(status.NOT_FOUND, "Pyament not found", null);
+  }
 
-    if (payment.status === "PAID") {
-      return;
-    }
+  if (payment.status === "PAID") {
+    return;
+  }
 
-    await tx.payment.update({
-      where: {
-        id: paymentId,
-      },
-      data: {
-        status: "PAID",
-        paidAt: new Date(),
-        stripePaymentIntentId: session.payment_intent as string,
-      },
-    });
+  const paidAt = new Date();
 
-    await tx.rentalAgreement.update({
-      where: {
-        id: payment.rentalAgreementId,
-      },
-      data: {
-        status: "ACTIVE",
-        activatedAt: payment.paidAt,
-      },
-    });
+  await tx.payment.update({
+    where: {
+      id: paymentId,
+    },
+    data: {
+      status: "PAID",
+      paidAt,
+      stripePaymentIntentId: session.payment_intent as string,
+    },
+  });
+
+  await tx.rentalAgreement.update({
+    where: {
+      id: payment.rentalAgreementId,
+    },
+    data: {
+      status: "ACTIVE",
+      activatedAt: paidAt,
+    },
   });
 };
 
