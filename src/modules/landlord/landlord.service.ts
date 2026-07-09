@@ -486,6 +486,39 @@ const updateRentalRequestStatus = async (
   return updatedStatus;
 };
 
+const getRentalAgreements = async (landlordId: string) => {
+  const agreements = await prisma.rentalAgreement.findMany({
+    where: {
+      property: {
+        landlordId,
+      },
+    },
+    select: {
+      id: true,
+      tenant: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      property: {
+        select: {
+          id: true,
+          title: true,
+        },
+      },
+      status: true,
+      activatedAt: true,
+      leaseStartDate: true,
+      leaseEndDate: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+
+  return agreements;
+};
+
 export const landlordService = {
   createPropertyListing,
   editPropertyListing,
@@ -495,4 +528,5 @@ export const landlordService = {
   updateMyPropertyAvailabilityStatus,
   getRentalRequests,
   updateRentalRequestStatus,
+  getRentalAgreements,
 };

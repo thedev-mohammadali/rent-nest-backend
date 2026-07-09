@@ -69,4 +69,11 @@ router.patch(
   landlordController.updateRentalRequestStatus,
 );
 
+router.get(
+  "/rental-agreements",
+  authenticate,
+  authorize(UserRole.LANDLORD),
+  landlordController.getRentalAgreements,
+);
+
 export const landlordRoutes = router;
