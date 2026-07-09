@@ -1,11 +1,17 @@
 import status from "http-status";
-import { RentalRequestStatus } from "../../generated/prisma/enums";
+import {
+  RentalAgreementStatus,
+  RentalRequestStatus,
+} from "../../generated/prisma/enums";
 import { RentalRequestWhereInput } from "../../generated/prisma/models";
 import { prisma } from "../../lib/prisma";
 import AppError from "../../utils/AppError";
 import { isValidEnumValue } from "../../utils/validateEnum";
 import { GetRentalRequestsQuery } from "../landlord/landlord.interface";
-import { SubmitRentalRequestPayload } from "./tenant.validate";
+import {
+  SubmitRentalRequestPayload,
+  UpdateRentalAgreementStatus,
+} from "./tenant.validate";
 
 const SORT_ORDERS = ["asc", "desc"] as const;
 
@@ -134,7 +140,51 @@ const getAllRentalRequests = async (
   };
 };
 
+const updateRentalAgreementStatus = async (
+  tenantId: string,
+  rentalAgreementId: string,
+  payload: UpdateRentalAgreementStatus,
+) => {
+  const allowedStatuses = [
+    RentalAgreementStatus.COMPLETED,
+    RentalAgreementStatus.TERMINATED,
+  ];
+
+  if (!allowedStatuses.includes(payload.status)) {
+    throw new AppError(
+      status.BAD_REQUEST,
+      "Invalid rental agreement status",
+      null,
+    );
+  }
+
+  const activeRentalAgreement = await prisma.rentalAgreement.findFirst({
+    where: {
+      id: rentalAgreementId,
+      tenantId,
+      status: "ACTIVE",
+    },
+  });
+
+  if (!activeRentalAgreement) {
+    throw new AppError(status.NOT_FOUND, "No agreement found to update", null);
+  }
+
+  return prisma.rentalAgreement.update({
+    where: {
+      id: rentalAgreementId,
+    },
+    data: {
+      status: payload.status,
+    },
+    select: {
+      status: true,
+    },
+  });
+};
+
 export const tenantService = {
   submitRentalRequest,
   getAllRentalRequests,
+  updateRentalAgreementStatus,
 };
