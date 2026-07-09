@@ -24,12 +24,38 @@ const updateUserStatus = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: status.OK,
     success: true,
-    message: `User is now ${user.isActive ? "Unbanned" : "Banned"}`,
+    message: `User ${user.isActive ? "unbanned" : "banned"} successfully`,
     data: user,
+  });
+});
+
+const getAllRentalRequests = catchAsync(async (req, res) => {
+  const { meta, requests } = await adminService.getAllRentalRequests(req.query);
+
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: "Rental reqeusts retrieved successfully",
+    meta,
+    data: requests,
+  });
+});
+
+const getAllProperties = catchAsync(async (req, res) => {
+  const { meta, listings } = await adminService.getAllProperties(req.query);
+
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: "Property listings retrieved successfully",
+    meta,
+    data: listings,
   });
 });
 
 export const adminController = {
   getAllUsers,
   updateUserStatus,
+  getAllProperties,
+  getAllRentalRequests,
 };

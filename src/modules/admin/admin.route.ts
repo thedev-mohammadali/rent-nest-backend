@@ -15,6 +15,20 @@ router.get(
   adminController.getAllUsers,
 );
 
+router.get(
+  "/properties",
+  authenticate,
+  authorize(UserRole.ADMIN),
+  adminController.getAllProperties,
+);
+
+router.get(
+  "/rental-requests",
+  authenticate,
+  authorize(UserRole.ADMIN),
+  adminController.getAllRentalRequests,
+);
+
 router.patch(
   "/users/:userId",
   authenticate,
