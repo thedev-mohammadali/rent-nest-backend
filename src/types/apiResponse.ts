@@ -22,6 +22,6 @@ export interface ErrorResponse {
   statusCode: number;
   success: false;
   message: string;
-  errorDetails: ErrorDetails[] | null;
+  errorDetails?: ErrorDetails[];
   errorStack?: string;
 }
