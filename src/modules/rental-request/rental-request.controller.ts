@@ -18,9 +18,11 @@ const submitRentalRequest = catchAsync(async (req, res) => {
 });
 
 const getTenantRentalRequests = catchAsync(async (req, res) => {
-  const { meta, requests } = await rentalRequestService.getTenantRentalRequests(
-    req.user.id,
+  const tenantId = req.user.id;
+
+  const { meta, requests } = await rentalRequestService.listRentalRequests(
     req.query,
+    { type: "TENANT", tenantId },
   );
 
   sendResponse(res, {
@@ -35,8 +37,10 @@ const getTenantRentalRequests = catchAsync(async (req, res) => {
 const getLandlordRentalRequests = catchAsync(async (req, res) => {
   const landlordId = req.user.id;
 
-  const { meta, requests } =
-    await rentalRequestService.getLandlordRentalRequests(landlordId, req.query);
+  const { meta, requests } = await rentalRequestService.listRentalRequests(
+    req.query,
+    { type: "LANDLORD", landlordId },
+  );
 
   sendResponse(res, {
     statusCode: status.OK,

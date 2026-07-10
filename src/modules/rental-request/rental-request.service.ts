@@ -1,10 +1,14 @@
 import status from "http-status";
+import { getPagination } from "../../common/query/pagination";
 import { RentalRequestStatus } from "../../generated/prisma/enums";
-import { RentalRequestWhereInput } from "../../generated/prisma/models";
 import { prisma } from "../../lib/prisma";
 import AppError from "../../utils/AppError";
-import { isValidEnumValue } from "../../utils/validateEnum";
 import { GetRentalRequestsQuery } from "./rental-request.interface";
+import {
+  buildRentalRequestFilters,
+  buildRentalRequestSorting,
+  Scope,
+} from "./rental-request.query";
 import {
   SubmitRentalRequestPayload,
   UpdateRentalRequestStatus,
@@ -61,117 +65,20 @@ const submitRentalRequest = async (
   });
 };
 
-const getTenantRentalRequests = async (
-  tenantId: string,
+const listRentalRequests = async (
   query: GetRentalRequestsQuery,
+  scope: Scope,
 ) => {
-  const limit = Math.max(1, Number(query.limit) || 10);
-  const page = Math.max(1, Number(query.page) || 1);
-  const skip = (page - 1) * limit;
+  const page = Number(query.page);
+  const limit = Number(query.limit);
 
-  const SORTABLE_FIELDS = [
-    "createdAt",
-    "requestedMoveInDate",
-    "durationInMonths",
-  ] as const;
+  const pagination = getPagination(page, limit);
 
-  const sortBy =
-    query.sortBy && SORTABLE_FIELDS.includes(query.sortBy)
-      ? query.sortBy
-      : "createdAt";
-
-  const sortOrder =
-    query.sortOrder && SORT_ORDERS.includes(query.sortOrder)
-      ? query.sortOrder
-      : "desc";
-
-  const andCondition: RentalRequestWhereInput[] = [];
-
-  if (query.status && !isValidEnumValue(RentalRequestStatus, query.status)) {
-    throw new AppError(status.BAD_REQUEST, "Invalid rental request status");
-  }
+  const { sortBy, sortOrder } = buildRentalRequestSorting(query);
+  const andCondition = buildRentalRequestFilters(query, scope);
 
   const requests = await prisma.rentalRequest.findMany({
     where: {
-      tenantId,
-      AND: andCondition,
-    },
-    include: {
-      rentalAgreement: true,
-      property: {
-        select: {
-          id: true,
-          title: true,
-          location: true,
-          rent: true,
-        },
-      },
-    },
-    orderBy: {
-      [sortBy]: sortOrder,
-    },
-    take: limit,
-    skip,
-  });
-
-  const totalRequests = await prisma.rentalRequest.count({
-    where: {
-      tenantId,
-      AND: andCondition,
-    },
-  });
-
-  return {
-    meta: {
-      page,
-      limit,
-      total: totalRequests,
-      totalPages: Math.ceil(totalRequests / limit),
-    },
-    requests,
-  };
-};
-
-const getLandlordRentalRequests = async (
-  landlordId: string,
-  query: GetRentalRequestsQuery,
-) => {
-  const limit = Math.max(1, Number(query.limit) || 10);
-  const page = Math.max(1, Number(query.page) || 1);
-  const skip = (page - 1) * limit;
-
-  const SORTABLE_FIELDS = [
-    "createdAt",
-    "requestedMoveInDate",
-    "durationInMonths",
-  ] as const;
-
-  const sortBy =
-    query.sortBy && SORTABLE_FIELDS.includes(query.sortBy)
-      ? query.sortBy
-      : "createdAt";
-
-  const sortOrder =
-    query.sortOrder && SORT_ORDERS.includes(query.sortOrder)
-      ? query.sortOrder
-      : "desc";
-
-  const andCondition: RentalRequestWhereInput[] = [];
-
-  if (query.status) {
-    if (!isValidEnumValue(RentalRequestStatus, query.status)) {
-      throw new AppError(status.BAD_REQUEST, "Invalid rental request status");
-    }
-    andCondition.push({
-      status: query.status,
-    });
-  }
-
-  const requests = await prisma.rentalRequest.findMany({
-    where: {
-      property: {
-        landlordId,
-      },
       AND: andCondition,
     },
     include: {
@@ -194,29 +101,183 @@ const getLandlordRentalRequests = async (
     orderBy: {
       [sortBy]: sortOrder,
     },
-    take: limit,
-    skip,
+    take: pagination.limit,
+    skip: pagination.skip,
   });
 
   const totalRequests = await prisma.rentalRequest.count({
     where: {
-      property: {
-        landlordId,
-      },
       AND: andCondition,
     },
   });
 
   return {
     meta: {
-      page,
-      limit,
+      page: pagination.page,
+      limit: pagination.limit,
       total: totalRequests,
-      totalPages: Math.ceil(totalRequests / limit),
+      totalPages: Math.ceil(totalRequests / pagination.limit),
     },
     requests,
   };
 };
+
+// const getTenantRentalRequests = async (
+//   tenantId: string,
+//   query: GetRentalRequestsQuery,
+// ) => {
+//   const limit = Math.max(1, Number(query.limit) || 10);
+//   const page = Math.max(1, Number(query.page) || 1);
+//   const skip = (page - 1) * limit;
+
+//   const SORTABLE_FIELDS = [
+//     "createdAt",
+//     "requestedMoveInDate",
+//     "durationInMonths",
+//   ] as const;
+
+//   const sortBy =
+//     query.sortBy && SORTABLE_FIELDS.includes(query.sortBy)
+//       ? query.sortBy
+//       : "createdAt";
+
+//   const sortOrder =
+//     query.sortOrder && SORT_ORDERS.includes(query.sortOrder)
+//       ? query.sortOrder
+//       : "desc";
+
+//   const andCondition: RentalRequestWhereInput[] = [];
+
+//   if (query.status && !isValidEnumValue(RentalRequestStatus, query.status)) {
+//     throw new AppError(status.BAD_REQUEST, "Invalid rental request status");
+//   }
+
+//   const requests = await prisma.rentalRequest.findMany({
+//     where: {
+//       tenantId,
+//       AND: andCondition,
+//     },
+//     include: {
+//       rentalAgreement: true,
+//       property: {
+//         select: {
+//           id: true,
+//           title: true,
+//           location: true,
+//           rent: true,
+//         },
+//       },
+//     },
+//     orderBy: {
+//       [sortBy]: sortOrder,
+//     },
+//     take: limit,
+//     skip,
+//   });
+
+//   const totalRequests = await prisma.rentalRequest.count({
+//     where: {
+//       tenantId,
+//       AND: andCondition,
+//     },
+//   });
+
+//   return {
+//     meta: {
+//       page,
+//       limit,
+//       total: totalRequests,
+//       totalPages: Math.ceil(totalRequests / limit),
+//     },
+//     requests,
+//   };
+// };
+
+// const getLandlordRentalRequests = async (
+//   landlordId: string,
+//   query: GetRentalRequestsQuery,
+// ) => {
+//   const limit = Math.max(1, Number(query.limit) || 10);
+//   const page = Math.max(1, Number(query.page) || 1);
+//   const skip = (page - 1) * limit;
+
+//   const SORTABLE_FIELDS = [
+//     "createdAt",
+//     "requestedMoveInDate",
+//     "durationInMonths",
+//   ] as const;
+
+//   const sortBy =
+//     query.sortBy && SORTABLE_FIELDS.includes(query.sortBy)
+//       ? query.sortBy
+//       : "createdAt";
+
+//   const sortOrder =
+//     query.sortOrder && SORT_ORDERS.includes(query.sortOrder)
+//       ? query.sortOrder
+//       : "desc";
+
+//   const andCondition: RentalRequestWhereInput[] = [];
+
+//   if (query.status) {
+//     if (!isValidEnumValue(RentalRequestStatus, query.status)) {
+//       throw new AppError(status.BAD_REQUEST, "Invalid rental request status");
+//     }
+//     andCondition.push({
+//       status: query.status,
+//     });
+//   }
+
+//   const requests = await prisma.rentalRequest.findMany({
+//     where: {
+//       property: {
+//         landlordId,
+//       },
+//       AND: andCondition,
+//     },
+//     include: {
+//       tenant: {
+//         select: {
+//           id: true,
+//           name: true,
+//           email: true,
+//         },
+//       },
+//       property: {
+//         select: {
+//           id: true,
+//           title: true,
+//           location: true,
+//           rent: true,
+//         },
+//       },
+//     },
+//     orderBy: {
+//       [sortBy]: sortOrder,
+//     },
+//     take: limit,
+//     skip,
+//   });
+
+//   const totalRequests = await prisma.rentalRequest.count({
+//     where: {
+//       property: {
+//         landlordId,
+//       },
+//       AND: andCondition,
+//     },
+//   });
+
+//   return {
+//     meta: {
+//       page,
+//       limit,
+//       total: totalRequests,
+//       totalPages: Math.ceil(totalRequests / limit),
+//     },
+//     requests,
+//   };
+// };
 
 const updateRentalRequestStatus = async (
   landlordId: string,
@@ -334,8 +395,7 @@ const updateRentalRequestStatus = async (
 };
 
 export const rentalRequestService = {
-  getLandlordRentalRequests,
   updateRentalRequestStatus,
   submitRentalRequest,
-  getTenantRentalRequests,
+  listRentalRequests,
 };
