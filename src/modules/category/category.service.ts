@@ -1,0 +1,81 @@
+import status from "http-status";
+import { prisma } from "../../lib/prisma";
+import AppError from "../../utils/AppError";
+import { CreateCategory } from "./category.validation";
+
+const createCategory = async (payload: CreateCategory) => {
+  const slug = createSlug(payload.name);
+
+  const existingCategory = await prisma.category.findFirst({
+    where: {
+      slug,
+    },
+  });
+
+  if (existingCategory) {
+    throw new AppError(status.CONFLICT, "Category already exists", null);
+  }
+
+  return prisma.category.create({
+    data: {
+      name: payload.name,
+      slug,
+    },
+  });
+};
+
+const getAllCategories = async () => {
+  return prisma.category.findMany({
+    orderBy: {
+      name: "asc",
+    },
+  });
+};
+
+const updateCategory = async (categoryId: string, payload: CreateCategory) => {
+  const category = await prisma.category.findUnique({
+    where: {
+      id: categoryId,
+    },
+  });
+
+  if (!category) {
+    throw new AppError(status.NOT_FOUND, "Category not found", null);
+  }
+
+  const slug = createSlug(payload.name);
+
+  const existingCategory = await prisma.category.findFirst({
+    where: {
+      slug,
+    },
+  });
+
+  if (existingCategory) {
+    throw new AppError(
+      status.CONFLICT,
+      "Category already exists with that name",
+      null,
+    );
+  }
+
+  return prisma.category.update({
+    where: {
+      id: categoryId,
+    },
+    data: {
+      name: payload.name,
+      slug,
+    },
+  });
+};
+
+const createSlug = (name: string) => {
+  return name.trim().toLowerCase().replace(/\s+/g, "-");
+};
+
+export const categoryService = {
+  createCategory,
+  getAllCategories,
+  updateCategory,
+};

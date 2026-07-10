@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { adminRoutes } from "../modules/admin/admin.route";
 import { authRoutes } from "../modules/auth/auth.route";
+import { categoryRoutes } from "../modules/category/category.route";
 import { landlordRoutes } from "../modules/landlord/landlord.route";
 import { paymentRoutes } from "../modules/payment/payment.route";
 import { propertyRoutes } from "../modules/property/property.route";
@@ -16,5 +17,6 @@ router.use("/payments", paymentRoutes);
 router.use("/reviews", reviewRoutes);
 router.use("/properties", propertyRoutes);
 router.use("/admin", adminRoutes);
+router.use("/categories", categoryRoutes);
 
 export default router;

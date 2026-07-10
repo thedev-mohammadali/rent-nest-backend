@@ -4,6 +4,7 @@ model Category {
   slug String @unique @db.VarChar(150)
 
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   properties Property[]
 
