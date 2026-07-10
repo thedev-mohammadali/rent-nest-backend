@@ -3,18 +3,18 @@ import { getPagination } from "../../common/query/pagination";
 import { PropertyWhereInput } from "../../generated/prisma/models";
 import { prisma } from "../../lib/prisma";
 import AppError from "../../utils/AppError";
-import { GetPropertyListingsQuery } from "../landlord/landlord.interface";
-import {
-  CreatePropertyListingPayload,
-  UpdatePropertyListingPayload,
-} from "../landlord/landlord.validate";
+
 import { GetPropertiesQuery } from "./property.interface";
+import {
+  CreatePropertyPayload,
+  UpdatePropertyPayload,
+} from "./property.validation";
 
 const SORT_ORDERS = ["asc", "desc"] as const;
 
 const getMyProperties = async (
   landlordId: string,
-  query: GetPropertyListingsQuery,
+  query: GetPropertiesQuery,
 ) => {
   const limit = Math.max(1, Number(query.limit) || 10);
   const page = Math.max(1, Number(query.page) || 1);
@@ -147,7 +147,7 @@ const getMyProperties = async (
 
 const createProperty = async (
   landlordId: string,
-  payload: CreatePropertyListingPayload,
+  payload: CreatePropertyPayload,
 ) => {
   const category = await prisma.category.findUnique({
     where: {
@@ -170,7 +170,7 @@ const createProperty = async (
 const updateProperty = async (
   propertyId: string,
   landlordId: string,
-  payload: UpdatePropertyListingPayload,
+  payload: UpdatePropertyPayload,
 ) => {
   const existingProperty = await prisma.property.findFirst({
     where: {

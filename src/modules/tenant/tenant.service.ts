@@ -7,7 +7,7 @@ import { RentalRequestWhereInput } from "../../generated/prisma/models";
 import { prisma } from "../../lib/prisma";
 import AppError from "../../utils/AppError";
 import { isValidEnumValue } from "../../utils/validateEnum";
-import { GetRentalRequestsQuery } from "../landlord/landlord.interface";
+import { GetRentalRequestsQuery } from "../rental-request/rental-request.interface";
 import {
   SubmitRentalRequestPayload,
   UpdateRentalAgreementStatus,

@@ -8,10 +8,8 @@ import {
 import { prisma } from "../../lib/prisma";
 import AppError from "../../utils/AppError";
 import { isValidEnumValue } from "../../utils/validateEnum";
-import {
-  GetPropertyListingsQuery,
-  GetRentalRequestsQuery,
-} from "../landlord/landlord.interface";
+import { GetPropertiesQuery } from "../property/property.interface";
+import { GetRentalRequestsQuery } from "../rental-request/rental-request.interface";
 import { GetUsersQuery } from "./admin.interface";
 import { UpdateUserStatus } from "./admin.validate";
 
@@ -192,7 +190,7 @@ const getAllRentalRequests = async (query: GetRentalRequestsQuery) => {
   };
 };
 
-const getAllProperties = async (query: GetPropertyListingsQuery) => {
+const getAllProperties = async (query: GetPropertiesQuery) => {
   const limit = Math.max(1, Number(query.limit) || 10);
   const page = Math.max(1, Number(query.page) || 1);
   const skip = (page - 1) * limit;
