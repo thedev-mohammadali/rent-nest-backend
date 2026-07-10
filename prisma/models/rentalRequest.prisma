@@ -3,7 +3,7 @@ model RentalRequest {
   tenantId            String              @map("tenant_id") @db.Uuid
   propertyId          String              @map("property_id") @db.Uuid
   status              RentalRequestStatus @default(PENDING)
-  message             String?
+  tenantMessage       String?             @map("tenant_message")
   requestedMoveInDate DateTime            @map("requested_move_in_date") @db.Date
 
   durationInMonths Int @map("duration_in_months")
@@ -18,5 +18,6 @@ model RentalRequest {
 
   @@index([propertyId])
   @@index([status])
+  @@index([tenantId])
   @@map("rental_requests")
 }

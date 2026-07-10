@@ -11,7 +11,7 @@ model Review {
 
   rentalAgreement RentalAgreement @relation(fields: [rentalAgreementId], references: [id])
   property        Property        @relation(fields: [propertyId], references: [id])
-  user            User            @relation(fields: [tenantId], references: [id])
+  tenant          User            @relation(fields: [tenantId], references: [id])
 
   @@index([propertyId])
   @@map("reviews")
