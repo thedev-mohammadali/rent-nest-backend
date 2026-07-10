@@ -18,5 +18,6 @@ router.use("/reviews", reviewRoutes);
 router.use("/properties", propertyRoutes);
 router.use("/admin", adminRoutes);
 router.use("/categories", categoryRoutes);
+router.use("/rental-agreements", categoryRoutes);
 
 export default router;
