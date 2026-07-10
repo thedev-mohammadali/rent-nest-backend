@@ -124,7 +124,5 @@ export const buildPropertyFilters = (
     });
   }
 
-  return {
-    andCondition,
-  };
+  return andCondition;
 };

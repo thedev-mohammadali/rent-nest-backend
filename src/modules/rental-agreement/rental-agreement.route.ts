@@ -11,8 +11,8 @@ const router = Router();
 router.get(
   "/",
   authenticate,
-  authorize(UserRole.LANDLORD),
-  rentalAgreementcontroller.getLandlordRentalAgreements,
+  authorize(UserRole.LANDLORD, UserRole.TENANT),
+  rentalAgreementcontroller.getRentalAgreements,
 );
 
 router.patch(

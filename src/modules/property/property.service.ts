@@ -20,7 +20,7 @@ const listProperties = async (query: GetPropertiesQuery, scope: Scope) => {
 
   const { limit, page, skip } = getPagination(currentPage, dataLimit);
 
-  const { andCondition } = buildPropertyFilters(query, scope);
+  const andCondition = buildPropertyFilters(query, scope);
   const { sortBy, sortOrder } = buildPropertySorting(query);
 
   const listings = await prisma.property.findMany({

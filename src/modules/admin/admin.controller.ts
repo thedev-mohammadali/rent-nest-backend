@@ -2,6 +2,7 @@ import { status } from "http-status";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 import { propertyService } from "../property/property.service";
+import { rentalAgreementService } from "../rental-agreement/rental-agreement.service";
 import { rentalRequestService } from "../rental-request/rental-request.service";
 import { adminService } from "./admin.service";
 
@@ -60,9 +61,25 @@ const getAllProperties = catchAsync(async (req, res) => {
   });
 });
 
+const getAllRentalAgreements = catchAsync(async (req, res) => {
+  const { meta, agreements } =
+    await rentalAgreementService.listRentalAgreements(req.query, {
+      type: "ADMIN",
+    });
+
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: "Rental agreements retrieved successfully",
+    meta,
+    data: agreements,
+  });
+});
+
 export const adminController = {
   getAllUsers,
   updateUserStatus,
   getAllProperties,
   getAllRentalRequests,
+  getAllRentalAgreements,
 };

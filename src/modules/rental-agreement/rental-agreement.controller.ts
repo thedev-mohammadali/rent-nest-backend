@@ -1,16 +1,16 @@
 import status from "http-status";
+import { UserRole } from "../../generated/prisma/enums";
+import { AuthenticatedUser } from "../../types/auth";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
+import { Scope } from "./rental-agreement.query";
 import { rentalAgreementService } from "./rental-agreement.service";
 
-const getLandlordRentalAgreements = catchAsync(async (req, res) => {
-  const landlordId = req.user.id;
+const getRentalAgreements = catchAsync(async (req, res) => {
+  const scope = getRentalAgreementScope(req.user);
 
   const { meta, agreements } =
-    await rentalAgreementService.getLandlordRentalAgreements(
-      landlordId,
-      req.query,
-    );
+    await rentalAgreementService.listRentalAgreements(req.query, scope);
 
   sendResponse(res, {
     statusCode: status.OK,
@@ -35,7 +35,28 @@ const updateRentalAgreementStatus = catchAsync(async (req, res) => {
   });
 });
 
+function getRentalAgreementScope(user: AuthenticatedUser): Scope {
+  switch (user.role) {
+    case UserRole.TENANT:
+      return {
+        type: "TENANT",
+        tenantId: user.id,
+      };
+
+    case UserRole.LANDLORD:
+      return {
+        type: "LANDLORD",
+        landlordId: user.id,
+      };
+
+    case UserRole.ADMIN:
+      return {
+        type: "ADMIN",
+      };
+  }
+}
+
 export const rentalAgreementcontroller = {
-  getLandlordRentalAgreements,
+  getRentalAgreements,
   updateRentalAgreementStatus,
 };

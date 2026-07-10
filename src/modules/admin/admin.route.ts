@@ -29,6 +29,13 @@ router.get(
   adminController.getAllRentalRequests,
 );
 
+router.get(
+  "/rental-agreements",
+  authenticate,
+  authorize(UserRole.ADMIN),
+  adminController.getAllRentalAgreements,
+);
+
 router.patch(
   "/users/:userId",
   authenticate,
