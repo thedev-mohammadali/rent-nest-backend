@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "tsx watch ./src/server.ts",
-    "build": "prisma migrate deploy && prisma generate && tsdown ./src/server.ts",
-    "start": "node dist/server.mjs"
+    "build": "prisma migrate deploy && prisma generate && tsup",
+    "start": "node dist/server.js"
   },
   "keywords": [],
   "author": "",
@@ -32,6 +32,7 @@
     "ms": "^2.1.3",
     "pg": "^8.22.0",
     "stripe": "^22.3.0",
+    "tsup": "^8.5.1",
     "zod": "^4.4.3"
   },
   "devDependencies": {
