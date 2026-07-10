@@ -1,14 +1,12 @@
 import status from "http-status";
 import { RentalRequestStatus, UserRole } from "../../generated/prisma/enums";
 import {
-  PropertyWhereInput,
   RentalRequestWhereInput,
   UserWhereInput,
 } from "../../generated/prisma/models";
 import { prisma } from "../../lib/prisma";
 import AppError from "../../utils/AppError";
 import { isValidEnumValue } from "../../utils/validateEnum";
-import { GetPropertiesQuery } from "../property/property.interface";
 import { GetRentalRequestsQuery } from "../rental-request/rental-request.interface";
 import { GetUsersQuery } from "./admin.interface";
 import { UpdateUserStatus } from "./admin.validate";
@@ -190,163 +188,8 @@ const getAllRentalRequests = async (query: GetRentalRequestsQuery) => {
   };
 };
 
-const getAllProperties = async (query: GetPropertiesQuery) => {
-  const limit = Math.max(1, Number(query.limit) || 10);
-  const page = Math.max(1, Number(query.page) || 1);
-  const skip = (page - 1) * limit;
-
-  const SORTABLE_FIELDS = ["createdAt", "rent", "title", "updatedAt"] as const;
-
-  const sortBy =
-    query.sortBy && SORTABLE_FIELDS.includes(query.sortBy)
-      ? query.sortBy
-      : "createdAt";
-
-  const sortOrder =
-    query.sortOrder && SORT_ORDERS.includes(query.sortOrder)
-      ? query.sortOrder
-      : "desc";
-
-  const { categoryId, isAvailable, location, search, minRent, maxRent } = query;
-
-  const andCondition: PropertyWhereInput[] = [];
-
-  if (categoryId) {
-    andCondition.push({
-      categoryId,
-    });
-  }
-
-  if (typeof isAvailable !== "undefined") {
-    andCondition.push({ isAvailable: isAvailable === "true" ? true : false });
-  }
-
-  if (location) {
-    andCondition.push({
-      location: {
-        contains: location,
-        mode: "insensitive",
-      },
-    });
-  }
-
-  if (minRent) {
-    andCondition.push({
-      rent: {
-        gte: Number(minRent),
-      },
-    });
-  }
-
-  if (maxRent) {
-    andCondition.push({
-      rent: {
-        lte: Number(maxRent),
-      },
-    });
-  }
-
-  if (search) {
-    andCondition.push({
-      OR: [
-        {
-          location: {
-            contains: search,
-            mode: "insensitive",
-          },
-        },
-        {
-          title: {
-            contains: search,
-            mode: "insensitive",
-          },
-        },
-        {
-          description: {
-            contains: search,
-            mode: "insensitive",
-          },
-        },
-        {
-          category: {
-            name: {
-              contains: search,
-              mode: "insensitive",
-            },
-          },
-        },
-      ],
-    });
-  }
-
-  const listings = await prisma.property.findMany({
-    where: {
-      AND: andCondition,
-    },
-    include: {
-      category: {
-        select: {
-          id: true,
-          name: true,
-        },
-      },
-      reviews: {
-        select: {
-          id: true,
-          rating: true,
-          comment: true,
-          tenantId: true,
-        },
-      },
-      rentalRequests: {
-        select: {
-          id: true,
-          status: true,
-        },
-      },
-      rentalAgreements: {
-        select: {
-          id: true,
-          status: true,
-          payments: {
-            select: {
-              id: true,
-              status: true,
-            },
-          },
-        },
-      },
-    },
-    omit: {
-      categoryId: true,
-    },
-    orderBy: {
-      [sortBy]: sortOrder,
-    },
-    take: limit,
-    skip,
-  });
-
-  const propertyCount = await prisma.property.count({
-    where: {
-      AND: andCondition,
-    },
-  });
-
-  return {
-    meta: {
-      page,
-      limit,
-      total: propertyCount,
-      totalPages: Math.ceil(propertyCount / limit),
-    },
-    listings,
-  };
-};
-
 export const adminService = {
   getAllUsers,
   updateUserStatus,
   getAllRentalRequests,
-  getAllProperties,
 };

@@ -4,16 +4,16 @@ import sendResponse from "../../utils/sendResponse";
 import { propertyService } from "./property.service";
 
 const getAvailableProperties = catchAsync(async (req, res) => {
-  const { meta, properties } = await propertyService.getAvailableProperties(
-    req.query,
-  );
+  const { meta, listings } = await propertyService.listProperties(req.query, {
+    type: "PUBLIC",
+  });
 
   sendResponse(res, {
     statusCode: status.OK,
     success: true,
     message: "Properties retreived successfully",
     meta,
-    data: properties,
+    data: listings,
   });
 });
 
@@ -33,10 +33,10 @@ const getPropertyById = catchAsync(async (req, res) => {
 const getMyProperties = catchAsync(async (req, res) => {
   const landlordId = req.user.id;
 
-  const { meta, listings } = await propertyService.getMyProperties(
+  const { meta, listings } = await propertyService.listProperties(req.query, {
+    type: "LANDLORD",
     landlordId,
-    req.query,
-  );
+  });
 
   sendResponse(res, {
     statusCode: status.OK,

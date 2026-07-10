@@ -1,6 +1,7 @@
 import { status } from "http-status";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
+import { propertyService } from "../property/property.service";
 import { adminService } from "./admin.service";
 
 const getAllUsers = catchAsync(async (req, res) => {
@@ -42,7 +43,9 @@ const getAllRentalRequests = catchAsync(async (req, res) => {
 });
 
 const getAllProperties = catchAsync(async (req, res) => {
-  const { meta, listings } = await adminService.getAllProperties(req.query);
+  const { meta, listings } = await propertyService.listProperties(req.query, {
+    type: "ADMIN",
+  });
 
   sendResponse(res, {
     statusCode: status.OK,
