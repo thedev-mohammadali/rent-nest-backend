@@ -42,18 +42,14 @@ const getAllUsers = async (query: GetUsersQuery) => {
 
   if (typeof isActive !== "undefined") {
     if (!["true", "false"].includes(isActive)) {
-      throw new AppError(
-        status.BAD_REQUEST,
-        "isActive must be true or false",
-        null,
-      );
+      throw new AppError(status.BAD_REQUEST, "isActive must be true or false");
     }
     andCondition.push({ isActive: isActive === "true" ? true : false });
   }
 
   if (role) {
     if (!isValidEnumValue(UserRole, role)) {
-      throw new AppError(status.BAD_REQUEST, "Invalid Role", null);
+      throw new AppError(status.BAD_REQUEST, "Invalid Role");
     }
     andCondition.push({
       role,
@@ -99,11 +95,11 @@ const updateUserStatus = async (userId: string, payload: UpdateUserStatus) => {
   });
 
   if (!user) {
-    throw new AppError(status.NOT_FOUND, "User not found", null);
+    throw new AppError(status.NOT_FOUND, "User not found");
   }
 
   if (user.isActive === payload.isActive) {
-    throw new AppError(status.CONFLICT, "User is already updated", null);
+    throw new AppError(status.CONFLICT, "User is already updated");
   }
 
   return prisma.user.update({
@@ -144,11 +140,7 @@ const getAllRentalRequests = async (query: GetRentalRequestsQuery) => {
 
   if (query.status) {
     if (!isValidEnumValue(RentalRequestStatus, query.status)) {
-      throw new AppError(
-        status.BAD_REQUEST,
-        "Invalid rental request status",
-        null,
-      );
+      throw new AppError(status.BAD_REQUEST, "Invalid rental request status");
     }
     andCondition.push({
       status: query.status,

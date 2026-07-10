@@ -8,11 +8,7 @@ const authorize = (...requiredRoles: [UserRole, ...UserRole[]]) =>
     const authenticatedUser = req.user;
 
     if (!authenticatedUser) {
-      throw new AppError(
-        status.UNAUTHORIZED,
-        "Please log in to continue",
-        null,
-      );
+      throw new AppError(status.UNAUTHORIZED, "Please log in to continue");
     }
 
     if (!requiredRoles.includes(authenticatedUser.role)) {

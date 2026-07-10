@@ -56,11 +56,7 @@ const refreshAccessToken = catchAsync(async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
 
   if (!refreshToken) {
-    throw new AppError(
-      status.UNAUTHORIZED,
-      "Please log in again to continue",
-      null,
-    );
+    throw new AppError(status.UNAUTHORIZED, "Please log in again to continue");
   }
 
   const accessToken = await authService.refreshAccessToken(refreshToken);

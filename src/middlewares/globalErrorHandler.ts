@@ -41,7 +41,6 @@ const globalErrorHandler: ErrorRequestHandler = (
     statusCode: status.INTERNAL_SERVER_ERROR,
     success: false,
     message: development ? (error as Error).message : "Something went wrong",
-    errorDetails: null,
     errorStack: development ? (error as Error).stack : undefined,
   });
 };

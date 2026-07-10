@@ -2,12 +2,12 @@ import { ErrorDetails } from "../types/apiResponse";
 
 class AppError extends Error {
   public readonly statusCode: number;
-  public readonly errorDetails: ErrorDetails[] | null;
+  public readonly errorDetails?: ErrorDetails[];
 
   constructor(
     statusCode: number,
     message: string,
-    errorDetails: ErrorDetails[] | null,
+    errorDetails?: ErrorDetails[],
   ) {
     super(message);
 

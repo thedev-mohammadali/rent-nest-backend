@@ -13,7 +13,7 @@ const authenticate = catchAsync(async (req, _res, next) => {
     : req.cookies.accessToken;
 
   if (!token) {
-    throw new AppError(status.UNAUTHORIZED, "Please log in to continue", null);
+    throw new AppError(status.UNAUTHORIZED, "Please log in to continue");
   }
 
   const decoded = verifyAccessToken(token);
@@ -35,7 +35,6 @@ const authenticate = catchAsync(async (req, _res, next) => {
     throw new AppError(
       status.UNAUTHORIZED,
       "Authentication failed! Please log in again to continue",
-      null,
     );
   }
 
@@ -43,7 +42,6 @@ const authenticate = catchAsync(async (req, _res, next) => {
     throw new AppError(
       status.FORBIDDEN,
       "Account is not active. Please contact support.",
-      null,
     );
   }
 

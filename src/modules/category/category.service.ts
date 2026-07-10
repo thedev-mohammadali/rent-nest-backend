@@ -13,7 +13,7 @@ const createCategory = async (payload: CreateCategory) => {
   });
 
   if (existingCategory) {
-    throw new AppError(status.CONFLICT, "Category already exists", null);
+    throw new AppError(status.CONFLICT, "Category already exists");
   }
 
   return prisma.category.create({
@@ -40,7 +40,7 @@ const updateCategory = async (categoryId: string, payload: CreateCategory) => {
   });
 
   if (!category) {
-    throw new AppError(status.NOT_FOUND, "Category not found", null);
+    throw new AppError(status.NOT_FOUND, "Category not found");
   }
 
   const slug = createSlug(payload.name);
@@ -55,7 +55,6 @@ const updateCategory = async (categoryId: string, payload: CreateCategory) => {
     throw new AppError(
       status.CONFLICT,
       "Category already exists with that name",
-      null,
     );
   }
 

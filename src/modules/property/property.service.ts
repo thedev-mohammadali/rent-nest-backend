@@ -129,7 +129,7 @@ const getPropertyById = async (propertyId: string) => {
   });
 
   if (!property) {
-    throw new AppError(status.NOT_FOUND, "Property not found", null);
+    throw new AppError(status.NOT_FOUND, "Property not found");
   }
 
   return property;

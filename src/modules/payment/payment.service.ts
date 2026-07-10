@@ -24,7 +24,6 @@ const handleStripeWebhook = async (payload: Buffer, signature: string) => {
     throw new AppError(
       status.BAD_REQUEST,
       "⚠️ Webhook signature verification failed.",
-      null,
     );
   }
 
@@ -85,14 +84,13 @@ const createCheckoutSession = async (
   });
 
   if (!rentalAgreement) {
-    throw new AppError(status.NOT_FOUND, "Rental agreement not found", null);
+    throw new AppError(status.NOT_FOUND, "Rental agreement not found");
   }
 
   if (rentalAgreement.status !== RentalAgreementStatus.PENDING_PAYMENT) {
     throw new AppError(
       status.BAD_REQUEST,
       "Payment is not available for this agreement",
-      null,
     );
   }
 
@@ -110,7 +108,6 @@ const createCheckoutSession = async (
       throw new AppError(
         status.CONFLICT,
         "A payment is already pending for this agreement",
-        null,
       );
     }
     return tx.payment.create({
@@ -158,7 +155,6 @@ const handleCheckoutCompleted = async (
     throw new AppError(
       status.BAD_REQUEST,
       "Pyament ID missing from Stripe metadata",
-      null,
     );
   }
 
@@ -169,7 +165,7 @@ const handleCheckoutCompleted = async (
   });
 
   if (!payment) {
-    throw new AppError(status.NOT_FOUND, "Pyament not found", null);
+    throw new AppError(status.NOT_FOUND, "Pyament not found");
   }
 
   if (payment.status === "PAID") {

@@ -168,7 +168,7 @@ const createPropertyListing = async (
   });
 
   if (!category) {
-    throw new AppError(status.BAD_REQUEST, "Category not found", null);
+    throw new AppError(status.BAD_REQUEST, "Category not found");
   }
 
   return prisma.property.create({
@@ -192,7 +192,7 @@ const editPropertyListing = async (
   });
 
   if (!existingProperty) {
-    throw new AppError(status.NOT_FOUND, "Property not found", null);
+    throw new AppError(status.NOT_FOUND, "Property not found");
   }
 
   if (payload.categoryId) {
@@ -203,7 +203,7 @@ const editPropertyListing = async (
     });
 
     if (!category) {
-      throw new AppError(status.BAD_REQUEST, "Category not found", null);
+      throw new AppError(status.BAD_REQUEST, "Category not found");
     }
   }
 
@@ -228,7 +228,7 @@ const deletePropertyListing = async (
   });
 
   if (!existingProperty) {
-    throw new AppError(status.NOT_FOUND, "Property not found", null);
+    throw new AppError(status.NOT_FOUND, "Property not found");
   }
 
   await prisma.property.delete({
@@ -248,7 +248,7 @@ const getMyPropertyById = async (propertyId: string, landlordId: string) => {
   });
 
   if (!property) {
-    throw new AppError(status.NOT_FOUND, "Property not found", null);
+    throw new AppError(status.NOT_FOUND, "Property not found");
   }
 
   return property;
@@ -266,7 +266,7 @@ const updateMyPropertyAvailabilityStatus = async (
   });
 
   if (!property) {
-    throw new AppError(status.NOT_FOUND, "Property not found", null);
+    throw new AppError(status.NOT_FOUND, "Property not found");
   }
 
   const updateAvailabilityStatus = !property.isAvailable;
@@ -313,11 +313,7 @@ const getRentalRequests = async (
 
   if (query.status) {
     if (!isValidEnumValue(RentalRequestStatus, query.status)) {
-      throw new AppError(
-        status.BAD_REQUEST,
-        "Invalid rental request status",
-        null,
-      );
+      throw new AppError(status.BAD_REQUEST, "Invalid rental request status");
     }
     andCondition.push({
       status: query.status,
@@ -397,14 +393,13 @@ const updateRentalRequestStatus = async (
   });
 
   if (!rentalRequest) {
-    throw new AppError(status.NOT_FOUND, "Rental request not found", null);
+    throw new AppError(status.NOT_FOUND, "Rental request not found");
   }
 
   if (rentalRequest.status !== RentalRequestStatus.PENDING) {
     throw new AppError(
       status.BAD_REQUEST,
       "Only pending rental requests can be updated",
-      null,
     );
   }
 
@@ -519,7 +514,7 @@ const getRentalAgreements = async (
 
   if (query.status) {
     if (!isValidEnumValue(RentalAgreementStatus, query.status)) {
-      throw new AppError(status.BAD_REQUEST, "Invalid status query", null);
+      throw new AppError(status.BAD_REQUEST, "Invalid status query");
     }
     andCondition.push({
       status: query.status,

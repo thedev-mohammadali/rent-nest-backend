@@ -20,11 +20,7 @@ const register = async (payload: RegisterPayload) => {
   });
 
   if (existingUser) {
-    throw new AppError(
-      status.CONFLICT,
-      "User already exists with this email",
-      null,
-    );
+    throw new AppError(status.CONFLICT, "User already exists with this email");
   }
 
   const hashedPassword = await bcrypt.hash(password, env.saltRounds);
@@ -77,7 +73,6 @@ const login = async (payload: LoginPayload) => {
     throw new AppError(
       status.FORBIDDEN,
       "Account is not active. Please contact support.",
-      null,
     );
   }
 
@@ -117,7 +112,6 @@ const refreshAccessToken = async (payload: string) => {
     throw new AppError(
       status.UNAUTHORIZED,
       "Authentication required. Please login to continue",
-      null,
     );
   }
 
@@ -125,7 +119,6 @@ const refreshAccessToken = async (payload: string) => {
     throw new AppError(
       status.UNAUTHORIZED,
       "Account is inactive. Please contact support",
-      null,
     );
   }
 

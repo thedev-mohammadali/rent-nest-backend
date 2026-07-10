@@ -26,7 +26,6 @@ const createReview = async (
     throw new AppError(
       status.NOT_FOUND,
       "No reviewable rental agreement was found",
-      null,
     );
   }
 
@@ -40,7 +39,6 @@ const createReview = async (
     throw new AppError(
       status.CONFLICT,
       "Review already submitted for this agreement",
-      null,
     );
   }
 

@@ -30,7 +30,7 @@ const submitRentalRequest = async (
   });
 
   if (!availableProperty) {
-    throw new AppError(status.NOT_FOUND, "Property is not available", null);
+    throw new AppError(status.NOT_FOUND, "Property is not available");
   }
 
   const existingRequest = await prisma.rentalRequest.findFirst({
@@ -47,7 +47,6 @@ const submitRentalRequest = async (
     throw new AppError(
       status.CONFLICT,
       "You already have an active rental request for this property",
-      null,
     );
   }
 
@@ -92,11 +91,7 @@ const getAllRentalRequests = async (
   const andCondition: RentalRequestWhereInput[] = [];
 
   if (query.status && !isValidEnumValue(RentalRequestStatus, query.status)) {
-    throw new AppError(
-      status.BAD_REQUEST,
-      "Invalid rental request status",
-      null,
-    );
+    throw new AppError(status.BAD_REQUEST, "Invalid rental request status");
   }
 
   const requests = await prisma.rentalRequest.findMany({
@@ -151,11 +146,7 @@ const updateRentalAgreementStatus = async (
   ];
 
   if (!allowedStatuses.includes(payload.status)) {
-    throw new AppError(
-      status.BAD_REQUEST,
-      "Invalid rental agreement status",
-      null,
-    );
+    throw new AppError(status.BAD_REQUEST, "Invalid rental agreement status");
   }
 
   const activeRentalAgreement = await prisma.rentalAgreement.findFirst({
@@ -167,7 +158,7 @@ const updateRentalAgreementStatus = async (
   });
 
   if (!activeRentalAgreement) {
-    throw new AppError(status.NOT_FOUND, "No agreement found to update", null);
+    throw new AppError(status.NOT_FOUND, "No agreement found to update");
   }
 
   return prisma.rentalAgreement.update({
