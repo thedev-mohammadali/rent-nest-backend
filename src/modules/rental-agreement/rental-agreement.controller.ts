@@ -21,6 +21,21 @@ const getLandlordRentalAgreements = catchAsync(async (req, res) => {
   });
 });
 
+const updateRentalAgreementStatus = catchAsync(async (req, res) => {
+  const updatedData = await rentalAgreementService.updateRentalAgreementStatus(
+    req.user.id,
+    req.params.agreementId as string,
+    req.body,
+  );
+
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: `Rental agreement status updated to ${updatedData.status} successfully`,
+  });
+});
+
 export const rentalAgreementcontroller = {
   getLandlordRentalAgreements,
+  updateRentalAgreementStatus,
 };
