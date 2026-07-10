@@ -3,13 +3,40 @@ import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 import { rentalRequestService } from "./rental-request.service";
 
-const getRentalRequests = catchAsync(async (req, res) => {
-  const landlordId = req.user.id;
+const submitRentalRequest = catchAsync(async (req, res) => {
+  const rentalData = await rentalRequestService.submitRentalRequest(
+    req.user.id,
+    req.body,
+  );
 
-  const { meta, requests } = await rentalRequestService.getRentalRequests(
-    landlordId,
+  sendResponse(res, {
+    statusCode: status.CREATED,
+    success: true,
+    message: "Rental request submitted successfully",
+    data: rentalData,
+  });
+});
+
+const getTenantRentalRequests = catchAsync(async (req, res) => {
+  const { meta, requests } = await rentalRequestService.getTenantRentalRequests(
+    req.user.id,
     req.query,
   );
+
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: "Rental requests retreived successfully",
+    meta,
+    data: requests,
+  });
+});
+
+const getLandlordRentalRequests = catchAsync(async (req, res) => {
+  const landlordId = req.user.id;
+
+  const { meta, requests } =
+    await rentalRequestService.getLandlordRentalRequests(landlordId, req.query);
 
   sendResponse(res, {
     statusCode: status.OK,
@@ -37,6 +64,8 @@ const updateRentalRequestStatus = catchAsync(async (req, res) => {
 });
 
 export const rentalRequestController = {
-  getRentalRequests,
+  getLandlordRentalRequests,
   updateRentalRequestStatus,
+  submitRentalRequest,
+  getTenantRentalRequests,
 };

@@ -64,7 +64,7 @@ const submitRentalRequest = async (
   });
 };
 
-const getAllRentalRequests = async (
+const getTenantRentalRequests = async (
   tenantId: string,
   query: GetRentalRequestsQuery,
 ) => {
@@ -176,6 +176,6 @@ const updateRentalAgreementStatus = async (
 
 export const tenantService = {
   submitRentalRequest,
-  getAllRentalRequests,
+  getTenantRentalRequests,
   updateRentalAgreementStatus,
 };

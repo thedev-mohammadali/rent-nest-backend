@@ -31,7 +31,7 @@ router.get(
   "/rental-requests/me",
   authenticate,
   authorize(UserRole.TENANT),
-  tenantController.getAllRentalRequests,
+  tenantController.getTenantRentalRequests,
 );
 
 export const tenantRoutes = router;

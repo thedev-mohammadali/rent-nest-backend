@@ -17,8 +17,8 @@ const submitRentalRequest = catchAsync(async (req, res) => {
   });
 });
 
-const getAllRentalRequests = catchAsync(async (req, res) => {
-  const { meta, requests } = await tenantService.getAllRentalRequests(
+const getTenantRentalRequests = catchAsync(async (req, res) => {
+  const { meta, requests } = await tenantService.getTenantRentalRequests(
     req.user.id,
     req.query,
   );
@@ -48,6 +48,6 @@ const updateRentalAgreementStatus = catchAsync(async (req, res) => {
 
 export const tenantController = {
   submitRentalRequest,
-  getAllRentalRequests,
+  getTenantRentalRequests,
   updateRentalAgreementStatus,
 };
