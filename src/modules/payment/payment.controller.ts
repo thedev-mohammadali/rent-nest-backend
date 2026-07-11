@@ -66,6 +66,14 @@ const createCheckoutSession = catchAsync(async (req, res) => {
   });
 });
 
+const successPayment = catchAsync(async (req, res) => {
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: "Payment Successful",
+  });
+});
+
 function getPaymentScope(user: AuthenticatedUser): Scope {
   switch (user.role) {
     case UserRole.TENANT:
@@ -92,4 +100,5 @@ export const paymentController = {
   handleStripeWebhook,
   getPayments,
   getPaymentById,
+  successPayment,
 };

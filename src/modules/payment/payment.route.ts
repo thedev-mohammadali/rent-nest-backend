@@ -29,4 +29,6 @@ router.get(
   paymentController.getPaymentById,
 );
 
+router.get("/success", paymentController.successPayment);
+
 export const paymentRoutes = router;
