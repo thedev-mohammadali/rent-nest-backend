@@ -15,4 +15,18 @@ router.post(
   paymentController.createCheckoutSession,
 );
 
+router.get(
+  "/",
+  authenticate,
+  authorize(UserRole.TENANT, UserRole.LANDLORD),
+  paymentController.getPayments,
+);
+
+router.get(
+  "/:paymentId",
+  authenticate,
+  authorize(UserRole.TENANT, UserRole.LANDLORD, UserRole.ADMIN),
+  paymentController.getPaymentById,
+);
+
 export const paymentRoutes = router;

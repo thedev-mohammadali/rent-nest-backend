@@ -1,7 +1,42 @@
 import status from "http-status";
+import { UserRole } from "../../generated/prisma/enums";
+import { AuthenticatedUser } from "../../types/auth";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
+import { Scope } from "./payment.query";
 import { paymentService } from "./payment.service";
+
+const getPayments = catchAsync(async (req, res) => {
+  const scope = getPaymentScope(req.user);
+  const { meta, payments } = await paymentService.listPayments(
+    req.query,
+    scope,
+  );
+
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: "Payments retreived successfully",
+    meta,
+    data: payments,
+  });
+});
+
+const getPaymentById = catchAsync(async (req, res) => {
+  const scope = getPaymentScope(req.user);
+
+  const payment = await paymentService.getPaymentById(
+    req.params.paymentId as string,
+    scope,
+  );
+
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: "Payments retreived successfully",
+    data: payment,
+  });
+});
 
 const handleStripeWebhook = catchAsync(async (req, res) => {
   await paymentService.handleStripeWebhook(
@@ -31,7 +66,30 @@ const createCheckoutSession = catchAsync(async (req, res) => {
   });
 });
 
+function getPaymentScope(user: AuthenticatedUser): Scope {
+  switch (user.role) {
+    case UserRole.TENANT:
+      return {
+        type: "TENANT",
+        tenantId: user.id,
+      };
+
+    case UserRole.LANDLORD:
+      return {
+        type: "LANDLORD",
+        landlordId: user.id,
+      };
+
+    case UserRole.ADMIN:
+      return {
+        type: "ADMIN",
+      };
+  }
+}
+
 export const paymentController = {
   createCheckoutSession,
   handleStripeWebhook,
+  getPayments,
+  getPaymentById,
 };

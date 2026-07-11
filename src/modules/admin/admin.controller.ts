@@ -1,6 +1,7 @@
 import { status } from "http-status";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
+import { paymentService } from "../payment/payment.service";
 import { propertyService } from "../property/property.service";
 import { rentalAgreementService } from "../rental-agreement/rental-agreement.service";
 import { rentalRequestService } from "../rental-request/rental-request.service";
@@ -76,10 +77,25 @@ const getAllRentalAgreements = catchAsync(async (req, res) => {
   });
 });
 
+const getAllPayments = catchAsync(async (req, res) => {
+  const { meta, payments } = await paymentService.listPayments(req.query, {
+    type: "ADMIN",
+  });
+
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: "Payments retreived successfully",
+    meta,
+    data: payments,
+  });
+});
+
 export const adminController = {
   getAllUsers,
   updateUserStatus,
   getAllProperties,
   getAllRentalRequests,
   getAllRentalAgreements,
+  getAllPayments,
 };

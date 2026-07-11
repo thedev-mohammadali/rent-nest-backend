@@ -36,6 +36,13 @@ router.get(
   adminController.getAllRentalAgreements,
 );
 
+router.get(
+  "/payments",
+  authenticate,
+  authorize(UserRole.ADMIN),
+  adminController.getAllPayments,
+);
+
 router.patch(
   "/users/:userId",
   authenticate,
