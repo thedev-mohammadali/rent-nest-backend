@@ -81,19 +81,6 @@ const updateProperty = catchAsync(async (req, res) => {
   });
 });
 
-const deleteProperty = catchAsync(async (req, res) => {
-  const landlordId = req.user.id;
-  const propertyId = req.params.propertyId as string;
-
-  await propertyService.deleteProperty(propertyId, landlordId);
-
-  sendResponse(res, {
-    statusCode: status.OK,
-    success: true,
-    message: "Property deleted successfully",
-  });
-});
-
 const getMyPropertyById = catchAsync(async (req, res) => {
   const landlordId = req.user.id;
   const propertyId = req.params.propertyId as string;
@@ -133,7 +120,6 @@ export const propertyController = {
   getPropertyById,
   createProperty,
   updateProperty,
-  deleteProperty,
   getMyPropertyById,
   updatePropertyAvailability,
 };

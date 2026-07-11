@@ -28,13 +28,6 @@ router.patch(
   propertyController.updateProperty,
 );
 
-router.delete(
-  "/:propertyId",
-  authenticate,
-  authorize(UserRole.LANDLORD),
-  propertyController.deleteProperty,
-);
-
 router.get(
   "/me/:propertyId",
   authenticate,

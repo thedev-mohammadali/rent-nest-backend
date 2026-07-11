@@ -121,26 +121,6 @@ const updateProperty = async (
   });
 };
 
-const deleteProperty = async (propertyId: string, landlordId: string) => {
-  const existingProperty = await prisma.property.findFirst({
-    where: {
-      id: propertyId,
-      landlordId,
-    },
-  });
-
-  if (!existingProperty) {
-    throw new AppError(status.NOT_FOUND, "Property not found");
-  }
-
-  await prisma.property.delete({
-    where: {
-      id: propertyId,
-      landlordId,
-    },
-  });
-};
-
 const getMyPropertyById = async (propertyId: string, landlordId: string) => {
   const property = await prisma.property.findFirst({
     where: {
@@ -208,7 +188,6 @@ const getPropertyById = async (propertyId: string) => {
 export const propertyService = {
   getPropertyById,
   getMyPropertyById,
-  deleteProperty,
   updateProperty,
   createProperty,
   updatePropertyAvailability,
