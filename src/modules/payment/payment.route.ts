@@ -8,6 +8,8 @@ const router = Router();
 
 router.post("/webhook", paymentController.handleStripeWebhook);
 
+router.get("/success", paymentController.successPayment);
+
 router.post(
   "/rental-agreements/:agreementId/checkout",
   authenticate,
@@ -28,7 +30,5 @@ router.get(
   authorize(UserRole.TENANT, UserRole.LANDLORD, UserRole.ADMIN),
   paymentController.getPaymentById,
 );
-
-router.get("/success", paymentController.successPayment);
 
 export const paymentRoutes = router;

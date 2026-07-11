@@ -1,201 +1,100 @@
 # RentNest Backend
 
-A production-ready **Rental Management System Backend** built with **Node.js, Express, TypeScript, PostgreSQL, Prisma ORM, and Stripe**.
+![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)
+![Node.js](https://img.shields.io/badge/Node.js-Express-green)
+![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon-blue)
+![Stripe](https://img.shields.io/badge/Stripe-Payments-635BFF)
+![License](https://img.shields.io/badge/License-Educational-orange)
 
-RentNest enables landlords to list rental properties, tenants to request and rent those properties, secure online payments through Stripe Checkout, and administrators to manage the entire platform.
+A production-ready **Rental Management System Backend** built with
+**Node.js, Express, TypeScript, PostgreSQL, Prisma ORM, and Stripe**.
 
----
-
-# Live API
-
-> Render Deployment
-
-```
-https://rent-nest-backend-1.onrender.com
-```
+## Quick Links
 
 ---
 
-# Project Overview
+Resource Link
 
-RentNest is a RESTful backend service that supports the complete rental lifecycle:
+---
 
-- User Authentication
+Backend Repository https://github.com/thedev-mohammadali/rent-nest-backend.git
+
+Live API https://rent-nest-backend-1.onrender.com/
+
+API Documentation https://documenter.getpostman.com/view/29072367/2sBY4LQgiB
+
+Demo Video https://drive.google.com/file/d/1f0bPzB-JE_i_1FODzWciud64w_VZqTPu/view?usp=sharing
+
+---
+
+## Demo Credentials
+
+Email Password
+
+---
+
+admin@rentnest.com Admin123@
+
+## Table of Contents
+
+- Project Overview
+- Features
+- Tech Stack
+- Architecture
+- Design Patterns
+- Installation
+- Environment Variables
+- Database Migration
+- Seed Script
+- Running the Project
+- Authentication
+- Stripe Integration
+- API Testing
+- Business Workflow
+- Deployment
+- Future Improvements
+- Author
+- License
+
+## Project Overview
+
+RentNest is a RESTful backend that manages the complete rental lifecycle
+including authentication, property listings, rental requests, rental
+agreements, Stripe payments, reviews, and administration.
+
+## Features
+
+- JWT Authentication with Access & Refresh Tokens
+- Category Management
 - Property Management
 - Rental Requests
 - Rental Agreements
-- Secure Online Payments
-- Property Reviews
-- Administrative Management
+- Stripe Checkout & Webhooks
+- Reviews
+- Administration
+- Pagination, Filtering, Searching and Sorting
 
-The application follows a **Domain-Driven Modular Architecture**, where each module represents a business domain instead of user roles, making the project easier to scale and maintain.
-
----
-
-# Features
-
-## Authentication
-
-- User Registration
-- Login
-- Refresh Token
-- Logout
-- Current User Profile
-- JWT Authentication
-- HTTP Only Refresh Token Cookies
-
----
-
-## Categories
-
-Admin can
-
-- Create Category
-- Update Category
-- View Categories
-
----
-
-## Property Management
-
-### Public
-
-- Browse Available Properties
-- View Property Details
-
-### Landlord
-
-- Create Property
-- Delete Property
-- Toggle Availability
-- View Own Properties
-- View Single Property
-
-### Admin
-
-- View All Properties
-
-Supports
-
-- Pagination
-- Search
-- Filtering
-- Sorting
-
----
-
-## Rental Requests
-
-Tenant
-
-- Request Property Rental
-- View Own Requests
-
-Landlord
-
-- View Rental Requests
-- Approve Request
-- Reject Request
-
-Admin
-
-- View All Requests
-
----
-
-## Rental Agreements
-
-- Automatically created after request approval
-- Scope-based visibility
-- Tenant access
-- Landlord access
-- Admin access
-
----
-
-## Payments
-
-Integrated with Stripe Checkout.
-
-Features
-
-- Secure Checkout Session
-- Stripe Webhook
-- Transaction-safe payment updates
-- Payment History
-- Payment Details
-
-Supports
-
-- Tenant
-- Landlord
-- Admin
-
----
-
-## Reviews
-
-Tenant can
-
-- Create Review
-
----
-
-## Admin
-
-Manage
-
-- Users
-- User Status
-
----
-
-# Tech Stack
-
-## Backend
+## Tech Stack
 
 - Node.js
 - Express.js
 - TypeScript
-
-## Database
-
 - PostgreSQL
 - Prisma ORM
-
-## Authentication
-
-- JWT
-- Refresh Tokens
-- HTTP Only Cookies
-- bcrypt
-
-## Validation
-
 - Zod
-
-## Payment
-
-- Stripe Checkout
-- Stripe Webhooks
-
-## Deployment
-
+- JWT
+- Stripe
 - Render
 - Neon PostgreSQL
 
----
+## Architecture
 
-# Architecture
-
-The project follows a **Domain-Driven Architecture**.
-
-```
+```text
 src/
-│
 ├── app/
-├── config/
 ├── common/
+├── config/
 ├── generated/
 ├── lib/
 ├── middleware/
@@ -208,376 +107,125 @@ src/
 │   ├── rental-agreement/
 │   ├── payment/
 │   └── review/
-│
 ├── routes/
 ├── types/
 ├── utils/
-│
 ├── app.ts
 └── server.ts
 ```
 
-Each module contains its own
+The project follows a Domain-Driven Modular Architecture with Thin
+Controllers, Fat Services, reusable Query Builders and Scope-Based
+Authorization.
 
-- Controller
-- Service
-- Route
-- Validation
-- Query Builder
-- Types
-
-Business logic stays inside services while controllers remain thin.
-
----
-
-# Design Patterns
-
-The application uses
-
-- Domain Driven Modular Structure
-- Thin Controllers
-- Fat Services
-- Query Builder Pattern
-- Scope-Based Authorization
-- Service Layer Pattern
-- Prisma ORM Repository Style
-- JWT Authentication
-- Centralized Error Handling
-
----
-
-# Query Builder Pattern
-
-The following modules use reusable query builders.
-
-- Property
-- Rental Request
-- Rental Agreement
-- Payment
-
-Each module supports
-
-- Filtering
-- Sorting
-- Pagination
-
----
-
-# Scope Based Authorization
-
-Depending on authenticated user,
-
-Scopes include
-
-- PUBLIC
-- TENANT
-- LANDLORD
-- ADMIN
-
-This allows a single service implementation to safely expose different datasets based on user permissions.
-
----
-
-# Installation
-
-Clone the repository
+## Installation
 
 ```bash
 git clone https://github.com/thedev-mohammadali/rent-nest-backend.git
-```
-
-Move inside the project
-
-```bash
 cd rent-nest-backend
-```
-
-Install dependencies
-
-```bash
 pnpm install
 ```
 
----
-
-# Environment Variables
-
-Create a `.env` file.
+## Environment Variables
 
 ```env
 PORT=
-
 DATABASE_URL=
-
 NODE_ENV=
-
 BCRYPT_SALT_ROUNDS=
-
 JWT_ACCESS_SECRET=
 JWT_REFRESH_SECRET=
-
 JWT_ACCESS_EXPIRES_IN=
 JWT_REFRESH_EXPIRES_IN=
-
 STRIPE_SECRET_KEY=
-
 STRIPE_WEBHOOK_SECRET=
-
 STRIPE_SUCCESS_URL=
 STRIPE_CANCEL_URL=
 ```
 
----
-
-# Database Migration
-
-Run Prisma migrations
+## Database Migration
 
 ```bash
 pnpm prisma migrate dev
-```
-
-Generate Prisma Client
-
-```bash
 pnpm prisma generate
 ```
 
----
-
-# Seed Admin User
-
-Run
+## Seed Script
 
 ```bash
 pnpm prisma db seed
 ```
 
-Demo Admin
+Creates the default administrator account.
 
-```
-Email:
-admin@rentnest.com
-
-Password:
-Admin123@
-```
-
----
-
-# Running the Project
-
-Development
+## Running
 
 ```bash
 pnpm dev
-```
-
-Production Build
-
-```bash
 pnpm build
-```
-
-Start Production
-
-```bash
 pnpm start
 ```
 
----
+## Authentication
 
-# API Modules
+Protected endpoints support:
 
-```
-Authentication
+- Bearer Token
+- HTTP-only Access Token Cookie
 
-Category
+Refresh Tokens are stored as HTTP-only cookies.
 
-Property
+## Stripe
 
-Rental Request
-
-Rental Agreement
-
-Payment
-
-Review
-
-Admin
-```
-
----
-
-# Authentication
-
-Protected routes require
-
-```
-Authorization: Bearer <access_token>
-```
-
-Refresh Tokens are stored securely using HTTP Only Cookies.
-
----
-
-# Stripe Integration
-
-RentNest uses
-
-- Stripe Checkout Session
-- Stripe Webhooks
-
-Webhook events update payment status after successful checkout.
-
-For local webhook testing
+Local webhook testing:
 
 ```bash
 stripe listen --forward-to localhost:5000/api/payments/webhook
 ```
 
----
+## API Testing
 
-# API Testing
+Use the published Postman documentation linked above.
 
-The project includes a complete Postman Collection.
+## Business Workflow
 
-Features
-
-- Organized by business workflow
-- Environment Variables
-- JWT Auto Save
-- Ready for evaluation
-
-Collection Structure
-
-```
-Authentication
-
-Category
-
-Property
-
-Rental Request
-
-Rental Agreement
-
-Payment
-
-Review
-
-Admin
-```
-
----
-
-# Business Workflow
-
-```
+```text
 Register
-
 ↓
-
 Login
-
 ↓
-
-Landlord Creates Property
-
+Create Property
 ↓
-
-Tenant Browses Properties
-
+Rental Request
 ↓
-
-Tenant Sends Rental Request
-
+Rental Agreement
 ↓
-
-Landlord Approves Request
-
+Stripe Payment
 ↓
-
-Rental Agreement Created
-
+Agreement Activated
 ↓
-
-Tenant Completes Stripe Payment
-
-↓
-
-Stripe Webhook Updates Payment
-
-↓
-
-Agreement Gets Activated
-
-↓
-
-Complete Rental
-
-↓
-
-Tenant Leaves Review
+Review
 ```
 
----
+## Deployment
 
-# Deployment
+- Backend: Render
+- Database: Neon
+- Payments: Stripe
 
-Backend
-
-```
-Render
-```
-
-Database
-
-```
-Neon PostgreSQL
-```
-
-Payments
-
-```
-Stripe
-```
-
----
-
-# Future Improvements
+## Future Improvements
 
 - Email Notifications
-- Property Images
-- Wishlist
-- Advanced Search
+- Image Uploads
 - Dashboard Analytics
-- File Uploads
-- API Rate Limiting
-- Unit & Integration Testing
+- Rate Limiting
+- Automated Testing
 
----
-
-# Demo Credentials
-
-## Admin
-
-```
-Email:
-admin@rentnest.com
-
-Password:
-Admin123@
-```
-
----
-
-# Author
+## Author
 
 **Mohammad Ali**
 
----
+## License
 
-# License
-
-This project was developed for educational purposes as part of a backend development assignment.
+Educational project developed as part of a backend development
+assignment.
