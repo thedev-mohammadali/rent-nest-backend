@@ -11,7 +11,7 @@ const router = Router();
 router.get(
   "/",
   authenticate,
-  authorize(UserRole.LANDLORD, UserRole.TENANT),
+  authorize(UserRole.LANDLORD, UserRole.TENANT, UserRole.ADMIN),
   rentalAgreementcontroller.getRentalAgreements,
 );
 

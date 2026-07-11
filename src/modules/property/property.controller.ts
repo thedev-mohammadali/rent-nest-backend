@@ -1,12 +1,32 @@
 import { status } from "http-status";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
+import { Scope } from "./property.query";
 import { propertyService } from "./property.service";
 
-const getAvailableProperties = catchAsync(async (req, res) => {
+const getMyProperties = catchAsync(async (req, res) => {
   const { meta, listings } = await propertyService.listProperties(req.query, {
-    type: "PUBLIC",
+    type: "LANDLORD",
+    landlordId: req.user.id,
   });
+
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: "Properties retreived successfully",
+    meta,
+    data: listings,
+  });
+});
+
+const getProperties = catchAsync(async (req, res) => {
+  const scope: Scope =
+    req.user?.role === "ADMIN" ? { type: "ADMIN" } : { type: "PUBLIC" };
+
+  const { meta, listings } = await propertyService.listProperties(
+    req.query,
+    scope,
+  );
 
   sendResponse(res, {
     statusCode: status.OK,
@@ -27,23 +47,6 @@ const getPropertyById = catchAsync(async (req, res) => {
     success: true,
     message: "Property retreived successfully",
     data: property,
-  });
-});
-
-const getMyProperties = catchAsync(async (req, res) => {
-  const landlordId = req.user.id;
-
-  const { meta, listings } = await propertyService.listProperties(req.query, {
-    type: "LANDLORD",
-    landlordId,
-  });
-
-  sendResponse(res, {
-    statusCode: status.OK,
-    success: true,
-    message: "Property listings retrieved successfully",
-    meta,
-    data: listings,
   });
 });
 
@@ -125,9 +128,9 @@ const updatePropertyAvailability = catchAsync(async (req, res) => {
 });
 
 export const propertyController = {
-  getAvailableProperties,
-  getPropertyById,
+  getProperties,
   getMyProperties,
+  getPropertyById,
   createProperty,
   updateProperty,
   deleteProperty,

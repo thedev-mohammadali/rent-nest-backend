@@ -16,7 +16,7 @@ const getPayments = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: status.OK,
     success: true,
-    message: "Payments retreived successfully",
+    message: "Payments retrieved successfully",
     meta,
     data: payments,
   });
@@ -33,7 +33,7 @@ const getPaymentById = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: status.OK,
     success: true,
-    message: "Payments retreived successfully",
+    message: "Payment retrieved successfully",
     data: payment,
   });
 });

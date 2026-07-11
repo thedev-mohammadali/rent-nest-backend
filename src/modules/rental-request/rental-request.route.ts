@@ -22,15 +22,8 @@ router.post(
 router.get(
   "/",
   authenticate,
-  authorize(UserRole.TENANT),
-  rentalRequestController.getTenantRentalRequests,
-);
-
-router.get(
-  "/received",
-  authenticate,
-  authorize(UserRole.LANDLORD),
-  rentalRequestController.getLandlordRentalRequests,
+  authorize(UserRole.ADMIN, UserRole.LANDLORD, UserRole.TENANT),
+  rentalRequestController.getRentalRequests,
 );
 
 router.patch(

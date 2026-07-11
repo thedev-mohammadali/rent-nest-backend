@@ -2,6 +2,7 @@ import { Router } from "express";
 import { UserRole } from "../../generated/prisma/enums";
 import authenticate from "../../middlewares/authentication";
 import authorize from "../../middlewares/authorization";
+import optionalAuthenticate from "../../middlewares/optionalAuthentiaction";
 import validateRequest from "../../middlewares/validateRequest";
 import { propertyController } from "./property.controller";
 import {
@@ -10,13 +11,6 @@ import {
 } from "./property.validation";
 
 const router = Router();
-
-router.get(
-  "/me",
-  authenticate,
-  authorize(UserRole.LANDLORD),
-  propertyController.getMyProperties,
-);
 
 router.post(
   "/",
@@ -55,7 +49,15 @@ router.patch(
   propertyController.updatePropertyAvailability,
 );
 
-router.get("/", propertyController.getAvailableProperties);
+router.get("/", optionalAuthenticate, propertyController.getProperties);
+
+router.get(
+  "/me",
+  authenticate,
+  authorize(UserRole.LANDLORD),
+  propertyController.getMyProperties,
+);
+
 router.get("/:propertyId", propertyController.getPropertyById);
 
 export const propertyRoutes = router;

@@ -18,7 +18,7 @@ router.post(
 router.get(
   "/",
   authenticate,
-  authorize(UserRole.TENANT, UserRole.LANDLORD),
+  authorize(UserRole.TENANT, UserRole.LANDLORD, UserRole.ADMIN),
   paymentController.getPayments,
 );
 

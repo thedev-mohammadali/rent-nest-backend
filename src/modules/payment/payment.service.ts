@@ -82,7 +82,7 @@ const getPaymentById = async (paymentId: string, scope: Scope) => {
       break;
   }
 
-  return prisma.payment.findFirst({
+  const payment = prisma.payment.findFirst({
     where: {
       id: paymentId,
       AND: andCondition,
@@ -91,6 +91,12 @@ const getPaymentById = async (paymentId: string, scope: Scope) => {
       checkoutUrl: true,
     },
   });
+
+  if (!payment) {
+    throw new AppError(status.NOT_FOUND, "Payment not found");
+  }
+
+  return payment;
 };
 
 const handleStripeWebhook = async (payload: Buffer, signature: string) => {

@@ -15,34 +15,6 @@ router.get(
   adminController.getAllUsers,
 );
 
-router.get(
-  "/properties",
-  authenticate,
-  authorize(UserRole.ADMIN),
-  adminController.getAllProperties,
-);
-
-router.get(
-  "/rental-requests",
-  authenticate,
-  authorize(UserRole.ADMIN),
-  adminController.getAllRentalRequests,
-);
-
-router.get(
-  "/rental-agreements",
-  authenticate,
-  authorize(UserRole.ADMIN),
-  adminController.getAllRentalAgreements,
-);
-
-router.get(
-  "/payments",
-  authenticate,
-  authorize(UserRole.ADMIN),
-  adminController.getAllPayments,
-);
-
 router.patch(
   "/users/:userId",
   authenticate,
