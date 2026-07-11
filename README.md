@@ -26,6 +26,8 @@ API Documentation https://documenter.getpostman.com/view/29072367/2sBY4LQgiB
 
 Demo Video https://drive.google.com/file/d/1f0bPzB-JE_i_1FODzWciud64w_VZqTPu/view?usp=sharing
 
+ERD: https://drawsql.app/teams/mohammad-ali-thedev/diagrams/rentnest
+
 ---
 
 ## Demo Credentials
