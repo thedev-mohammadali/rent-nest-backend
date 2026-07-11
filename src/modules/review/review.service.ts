@@ -53,7 +53,7 @@ const createReview = async (
       id: true,
       rating: true,
       comment: true,
-      user: {
+      tenant: {
         select: {
           name: true,
         },
@@ -101,7 +101,7 @@ const getReviewsByPropertyId = async (
       rating: true,
       comment: true,
       createdAt: true,
-      user: {
+      tenant: {
         select: {
           id: true,
           name: true,
