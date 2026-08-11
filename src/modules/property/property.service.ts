@@ -34,6 +34,12 @@ const listProperties = async (query: GetPropertiesQuery, scope: Scope) => {
           name: true,
         },
       },
+      landlord: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
     },
     omit: {
       categoryId: true,
@@ -174,6 +180,18 @@ const getPropertyById = async (propertyId: string) => {
       isAvailable: true,
     },
     include: {
+      landlord: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      category: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
       reviews: true,
     },
   });

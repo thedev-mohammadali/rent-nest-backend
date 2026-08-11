@@ -38,6 +38,8 @@ const listRentalAgreements = async (
         select: {
           id: true,
           title: true,
+          rent: true,
+          location: true,
         },
       },
       status: true,
