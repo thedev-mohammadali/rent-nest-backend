@@ -5,17 +5,12 @@ import catchAsync from "../utils/catchAsync";
 import { verifyAccessToken } from "../utils/jwt";
 
 const authenticate = catchAsync(async (req, _res, next) => {
-  console.log("AUTH HEADERS:", req.headers);
-  console.log("AUTH COOKIES:", req.cookies);
-
   const authorizationHeader = req.headers.authorization;
   const token = authorizationHeader
     ? authorizationHeader.startsWith("Bearer")
       ? authorizationHeader.split(" ")[1]
       : authorizationHeader
     : req.cookies.accessToken;
-
-  console.log("AUTH TOKEN:", token);
 
   if (!token) {
     throw new AppError(status.UNAUTHORIZED, "Please log in to continue");
@@ -28,8 +23,6 @@ const authenticate = catchAsync(async (req, _res, next) => {
   } catch {
     throw new AppError(status.UNAUTHORIZED, "Invalid or expired token");
   }
-
-  console.log("DECODED:", decoded);
 
   const authenticatedUser = await prisma.user.findUnique({
     where: {
