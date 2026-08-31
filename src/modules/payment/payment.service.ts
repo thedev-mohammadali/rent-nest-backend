@@ -192,12 +192,14 @@ const createCheckoutSession = async (
       },
     });
 
-    if (existingPayment) {
-      throw new AppError(
-        status.CONFLICT,
-        "A payment is already pending for this agreement",
-      );
+    if (existingPayment?.sessionExpiresAt) {
+      const isExpired =
+        new Date() >= new Date(existingPayment.sessionExpiresAt);
+      if (!isExpired) {
+        return existingPayment;
+      }
     }
+
     return tx.payment.create({
       data: {
         rentalAgreementId,
@@ -207,7 +209,16 @@ const createCheckoutSession = async (
     });
   });
 
-  const checkoutSession = await stripeService.createCheckoutSession({
+  if (payment?.sessionExpiresAt) {
+    const isExpired = new Date() >= new Date(payment.sessionExpiresAt);
+    if (!isExpired) {
+      return {
+        checkoutUrl: payment.checkoutUrl,
+      };
+    }
+  }
+
+  const paymentMetadata = {
     paymentId: payment.id,
     rentalAgreementId,
     rentalRequestId: rentalAgreement.rentalRequestId,
@@ -216,7 +227,10 @@ const createCheckoutSession = async (
     currency: payment.currency,
     amount: Math.round(Number(payment.amount)),
     propertyTitle: rentalAgreement.property.title,
-  });
+  };
+
+  const checkoutSession =
+    await stripeService.createCheckoutSession(paymentMetadata);
 
   await prisma.payment.update({
     where: {
@@ -225,6 +239,10 @@ const createCheckoutSession = async (
     data: {
       stripeSessionId: checkoutSession.id,
       checkoutUrl: checkoutSession.url,
+      metadata: paymentMetadata,
+      sessionExpiresAt: new Date(
+        checkoutSession.expires_at * 1000,
+      ).toISOString(),
     },
   });
 
