@@ -49,7 +49,22 @@ const updateRentalRequestStatus = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: status.OK,
     success: true,
-    message: `Rental requests status updated to ${updatedStatus} successfully`,
+    message: `Rental request status updated to ${updatedStatus} successfully`,
+  });
+});
+
+const cancelRentalRequestStatus = catchAsync(async (req, res) => {
+  const tenantId = req.user.id;
+
+  await rentalRequestService.cancelRentalRequestStatus(
+    tenantId,
+    req.params.id as string,
+  );
+
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: `Rental request cancelled successfully`,
   });
 });
 
@@ -76,6 +91,7 @@ function getRentalRequestScope(user: AuthenticatedUser): Scope {
 
 export const rentalRequestController = {
   updateRentalRequestStatus,
+  cancelRentalRequestStatus,
   submitRentalRequest,
   getRentalRequests,
 };

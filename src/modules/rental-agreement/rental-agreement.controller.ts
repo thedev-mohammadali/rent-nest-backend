@@ -9,15 +9,33 @@ import { rentalAgreementService } from "./rental-agreement.service";
 const getRentalAgreements = catchAsync(async (req, res) => {
   const scope = getRentalAgreementScope(req.user);
 
-  const { meta, agreements } =
+  const { meta, agreements, summary } =
     await rentalAgreementService.listRentalAgreements(req.query, scope);
+
+  const agreementSummary = {
+    active: 0,
+    completed: 0,
+  };
+
+  for (const item of summary) {
+    if (item.status === "ACTIVE") {
+      agreementSummary.active = item._count._all;
+    }
+
+    if (item.status === "COMPLETED") {
+      agreementSummary.completed = item._count._all;
+    }
+  }
 
   sendResponse(res, {
     statusCode: status.OK,
     success: true,
     message: `Rental agreements retreived successfully`,
     meta,
-    data: agreements,
+    data: {
+      agreements,
+      summary: agreementSummary,
+    },
   });
 });
 

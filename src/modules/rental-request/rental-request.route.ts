@@ -27,11 +27,18 @@ router.get(
 );
 
 router.patch(
-  "/:id",
+  "/:id/update",
   authenticate,
   authorize(UserRole.LANDLORD),
   validateRequest(updateRentalRequestStatusSchema),
   rentalRequestController.updateRentalRequestStatus,
+);
+
+router.patch(
+  "/:id/cancel",
+  authenticate,
+  authorize(UserRole.TENANT),
+  rentalRequestController.cancelRentalRequestStatus,
 );
 
 export const rentalRequestRoutes = router;

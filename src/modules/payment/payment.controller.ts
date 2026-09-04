@@ -8,17 +8,47 @@ import { paymentService } from "./payment.service";
 
 const getPayments = catchAsync(async (req, res) => {
   const scope = getPaymentScope(req.user);
-  const { meta, payments } = await paymentService.listPayments(
+  const { meta, payments, summary } = await paymentService.listPayments(
     req.query,
     scope,
   );
+
+  const paymentSummary = {
+    pending: {
+      amount: "0",
+      count: 0,
+    },
+    paid: {
+      amount: "0",
+      count: 0,
+    },
+  };
+
+  for (const item of summary) {
+    if (item.status === "PENDING") {
+      paymentSummary.pending = {
+        amount: item._sum.amount?.toString() ?? "0",
+        count: item._count._all,
+      };
+    }
+
+    if (item.status === "PAID") {
+      paymentSummary.paid = {
+        amount: item._sum.amount?.toString() ?? "0",
+        count: item._count._all,
+      };
+    }
+  }
 
   sendResponse(res, {
     statusCode: status.OK,
     success: true,
     message: "Payments retrieved successfully",
     meta,
-    data: payments,
+    data: {
+      payments,
+      summary: paymentSummary,
+    },
   });
 });
 
@@ -66,6 +96,22 @@ const createCheckoutSession = catchAsync(async (req, res) => {
   });
 });
 
+const verifyCheckoutSession = catchAsync(async (req, res) => {
+  const tenantId = req.user.id;
+
+  const payment = await paymentService.verifyCheckoutSession(
+    req.params.sessionId as string,
+    tenantId,
+  );
+
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: "Payment session verified successfully",
+    data: payment,
+  });
+});
+
 const successPayment = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: status.OK,
@@ -101,4 +147,5 @@ export const paymentController = {
   getPayments,
   getPaymentById,
   successPayment,
+  verifyCheckoutSession,
 };

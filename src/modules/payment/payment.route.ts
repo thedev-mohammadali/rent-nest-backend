@@ -31,4 +31,11 @@ router.get(
   paymentController.getPaymentById,
 );
 
+router.get(
+  "/verify-session/:sessionId",
+  authenticate,
+  authorize(UserRole.TENANT),
+  paymentController.verifyCheckoutSession,
+);
+
 export const paymentRoutes = router;

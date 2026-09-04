@@ -56,6 +56,16 @@ const listRentalAgreements = async (
     skip: pagination.skip,
   });
 
+  const agreementSummary = await prisma.rentalAgreement.groupBy({
+    by: ["status"],
+    where: {
+      AND: andCondition,
+    },
+    _count: {
+      _all: true,
+    },
+  });
+
   const totalAgreements = await prisma.rentalAgreement.count({
     where: {
       AND: andCondition,
@@ -70,6 +80,7 @@ const listRentalAgreements = async (
       totalPages: Math.ceil(totalAgreements / pagination.limit),
     },
     agreements,
+    summary: agreementSummary,
   };
 };
 
@@ -104,7 +115,7 @@ const updateRentalAgreementStatus = async (
       id: rentalAgreementId,
     },
     data: {
-      status: payload.status,
+      status: "COMPLETED",
     },
     select: {
       status: true,

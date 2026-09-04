@@ -20,7 +20,7 @@ const createCheckoutSession = async (payload: CreateCheckoutSessionPayload) => {
 
     mode: "payment",
     payment_method_types: ["card"],
-    success_url: env.successUrl,
+    success_url: `${env.successUrl}?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: env.cancelUrl,
 
     customer_email: payload.email,
@@ -43,6 +43,13 @@ const createCheckoutSession = async (payload: CreateCheckoutSessionPayload) => {
   return session;
 };
 
+const getCheckoutSession = async (sessionId: string) => {
+  const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+  return session;
+};
+
 export const stripeService = {
   createCheckoutSession,
+  getCheckoutSession,
 };

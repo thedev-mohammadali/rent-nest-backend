@@ -235,8 +235,49 @@ const updateRentalRequestStatus = async (
   return updatedStatus;
 };
 
+const cancelRentalRequestStatus = async (
+  tenantId: string,
+  requestId: string,
+) => {
+  const rentalRequest = await prisma.rentalRequest.findFirst({
+    where: {
+      id: requestId,
+      tenantId,
+    },
+    include: {
+      property: {
+        select: {
+          id: true,
+        },
+      },
+    },
+  });
+
+  if (!rentalRequest) {
+    throw new AppError(status.NOT_FOUND, "Rental request not found");
+  }
+
+  if (rentalRequest.status !== RentalRequestStatus.PENDING) {
+    throw new AppError(
+      status.BAD_REQUEST,
+      "Only pending rental requests can be cancelled",
+    );
+  }
+
+  await prisma.rentalRequest.update({
+    where: {
+      id: requestId,
+      tenantId,
+    },
+    data: {
+      status: "CANCELLED",
+    },
+  });
+};
+
 export const rentalRequestService = {
   updateRentalRequestStatus,
+  cancelRentalRequestStatus,
   submitRentalRequest,
   listRentalRequests,
 };

@@ -42,6 +42,19 @@ const listPayments = async (query: GetPaymentsQuery, scope: Scope) => {
     skip,
   });
 
+  const paymentSummary = await prisma.payment.groupBy({
+    by: ["status"],
+    where: {
+      AND: andCondition,
+    },
+    _sum: {
+      amount: true,
+    },
+    _count: {
+      _all: true,
+    },
+  });
+
   const totalPayments = await prisma.payment.count({
     where: {
       AND: andCondition,
@@ -56,6 +69,7 @@ const listPayments = async (query: GetPaymentsQuery, scope: Scope) => {
       totalPages: Math.ceil(totalPayments / limit),
     },
     payments,
+    summary: paymentSummary,
   };
 };
 
@@ -189,10 +203,16 @@ const createCheckoutSession = async (
         status: {
           in: [PaymentStatus.PENDING, PaymentStatus.PROCESSING],
         },
+        checkoutUrl: {
+          not: null,
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
       },
     });
 
-    if (existingPayment?.sessionExpiresAt) {
+    if (existingPayment?.sessionExpiresAt && existingPayment.checkoutUrl) {
       const isExpired =
         new Date() >= new Date(existingPayment.sessionExpiresAt);
       if (!isExpired) {
@@ -209,7 +229,7 @@ const createCheckoutSession = async (
     });
   });
 
-  if (payment?.sessionExpiresAt) {
+  if (payment.sessionExpiresAt) {
     const isExpired = new Date() >= new Date(payment.sessionExpiresAt);
     if (!isExpired) {
       return {
@@ -302,9 +322,67 @@ const handleCheckoutCompleted = async (
   });
 };
 
+const verifyCheckoutSession = async (sessionId: string, tenantId: string) => {
+  const session = await stripeService.getCheckoutSession(sessionId);
+
+  if (!session) {
+    throw new AppError(status.NOT_FOUND, "Payment session not found");
+  }
+
+  const paymentId = session.metadata?.paymentId;
+
+  if (!paymentId) {
+    throw new AppError(status.BAD_REQUEST, "Invalid payment session");
+  }
+
+  const payment = await prisma.payment.findFirst({
+    where: {
+      id: paymentId,
+      rentalAgreement: {
+        tenantId,
+      },
+    },
+    include: {
+      rentalAgreement: {
+        include: {
+          property: {
+            select: {
+              title: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!payment) {
+    throw new AppError(status.NOT_FOUND, "Payment not found");
+  }
+
+  if (session.metadata?.tenantId !== tenantId) {
+    throw new AppError(
+      status.FORBIDDEN,
+      "You are not authorized to view this payment",
+    );
+  }
+
+  return {
+    id: payment.id,
+    amount: payment.amount.toString(),
+    currency: payment.currency,
+    status: payment.status,
+    provider: payment.provider,
+    propertyTitle: payment.rentalAgreement.property.title,
+    rentalAgreementId: payment.rentalAgreementId,
+    stripeSessionId: session.id,
+    paymentStatus: session.payment_status,
+  };
+};
+
 export const paymentService = {
   createCheckoutSession,
   handleStripeWebhook,
   listPayments,
   getPaymentById,
+  verifyCheckoutSession,
 };
