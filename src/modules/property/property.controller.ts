@@ -5,17 +5,33 @@ import { Scope } from "./property.query";
 import { propertyService } from "./property.service";
 
 const getMyProperties = catchAsync(async (req, res) => {
-  const { meta, listings } = await propertyService.listProperties(req.query, {
-    type: "LANDLORD",
-    landlordId: req.user.id,
-  });
+  const { meta, listings, summary } = await propertyService.listProperties(
+    req.query,
+    {
+      type: "LANDLORD",
+      landlordId: req.user.id,
+    },
+  );
+
+  const propertySummary = {
+    available: 0,
+  };
+
+  for (const item of summary) {
+    if (item.isAvailable) {
+      propertySummary.available = item._count._all;
+    }
+  }
 
   sendResponse(res, {
     statusCode: status.OK,
     success: true,
     message: "Properties retreived successfully",
     meta,
-    data: listings,
+    data: {
+      properties: listings,
+      summary: propertySummary,
+    },
   });
 });
 

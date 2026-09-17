@@ -51,6 +51,16 @@ const listProperties = async (query: GetPropertiesQuery, scope: Scope) => {
     skip,
   });
 
+  const propertySummary = await prisma.property.groupBy({
+    by: ["isAvailable"],
+    where: {
+      AND: andCondition,
+    },
+    _count: {
+      _all: true,
+    },
+  });
+
   const propertyCount = await prisma.property.count({
     where: {
       AND: andCondition,
@@ -65,6 +75,7 @@ const listProperties = async (query: GetPropertiesQuery, scope: Scope) => {
       totalPages: Math.ceil(propertyCount / limit),
     },
     listings,
+    summary: propertySummary,
   };
 };
 

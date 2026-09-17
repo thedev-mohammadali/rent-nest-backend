@@ -1,5 +1,6 @@
 import status from "http-status";
 import { getPagination } from "../../common/query/pagination";
+import { Prisma } from "../../generated/prisma/client";
 import { RentalAgreementStatus } from "../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
 import AppError from "../../utils/AppError";
@@ -123,7 +124,26 @@ const updateRentalAgreementStatus = async (
   });
 };
 
+const getMonthlyRevenue = async (landlordId: string) => {
+  const result = await prisma.rentalAgreement.aggregate({
+    where: {
+      AND: {
+        property: {
+          landlordId,
+        },
+        status: "ACTIVE",
+      },
+    },
+    _sum: {
+      monthlyRent: true,
+    },
+  });
+
+  return result._sum.monthlyRent ?? new Prisma.Decimal(0);
+};
+
 export const rentalAgreementService = {
   listRentalAgreements,
   updateRentalAgreementStatus,
+  getMonthlyRevenue,
 };

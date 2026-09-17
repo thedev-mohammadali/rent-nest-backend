@@ -23,4 +23,11 @@ router.patch(
   rentalAgreementcontroller.updateRentalAgreementStatus,
 );
 
+router.get(
+  "/monthly-revenue",
+  authenticate,
+  authorize(UserRole.LANDLORD),
+  rentalAgreementcontroller.getMonthlyRevenue,
+);
+
 export const rentalAgreementRoutes = router;

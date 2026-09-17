@@ -53,6 +53,21 @@ const updateRentalAgreementStatus = catchAsync(async (req, res) => {
   });
 });
 
+const getMonthlyRevenue = catchAsync(async (req, res) => {
+  const monthlyRevenue = await rentalAgreementService.getMonthlyRevenue(
+    req.user.id,
+  );
+
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: `Data retrieved successfully`,
+    data: {
+      monthlyRevenue,
+    },
+  });
+});
+
 function getRentalAgreementScope(user: AuthenticatedUser): Scope {
   switch (user.role) {
     case UserRole.TENANT:
@@ -77,4 +92,5 @@ function getRentalAgreementScope(user: AuthenticatedUser): Scope {
 export const rentalAgreementcontroller = {
   getRentalAgreements,
   updateRentalAgreementStatus,
+  getMonthlyRevenue,
 };
